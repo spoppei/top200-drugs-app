@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 200 Drugs Quiz</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    /* ===========================
+       CSS VARIABLES
+    =========================== */
+    :root {
+      --bg: #ffffff;
+      --text: #222222;
+      --card-bg: #ffffff;
+      --border-color: #ddd;
+
+      --button-bg: #ffe0f0;
+      --button-border: #ff99c9;
+      --button-hover: #ffc5e0;
+      --button-active-bg: #ff99c9;
+      --button-active-text: #222;
+
+      --correct: #b6ffb6;
+      --correct-border: #6ecf6e;
+
+      --incorrect: #ffbaba;
+      --incorrect-border: #e57373;
+
+      --progress-bg: #eee;
+      --progress-fill: linear-gradient(90deg, #ff66a3, #ff9472);
+      
+      --font-size-base: 16px;
+      --font-size-lg: 20px;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+      --bg: #1e1e1e;
+      --text: #f4f4f4;
+      --card-bg: #2a2a2a;
+      --border-color: #444;
+
+      --button-bg: #3a3a3a;
+      --button-border: #666666;
+      --button-hover: #555555;
+      --button-active-bg: #ff66a3;
+      --button-active-text: #fff;
+
+      --correct: #118c4f;
+      --correct-border: #0f6d3e;
+
+      --incorrect: #a33a3a;
+      --incorrect-border: #842b2b;
+
+      --progress-bg: #444;
+      --progress-fill: linear-gradient(90deg, #ff79c2, #ffad82);
+    }
+    
+    /* High Contrast Mode */
+    body.high-contrast {
+        --bg: #000000;
+        --text: #ffffff;
+        --card-bg: #000000;
+        --border-color: #ffffff;
+        
+        --button-bg: #000000;
+        --button-border: #ffffff;
+        --button-hover: #333333;
+        --button-active-bg: #ffff00;
+        --button-active-text: #000000;
+        
+        --correct: #00ff00;
+        --correct-border: #ffffff;
+        --incorrect: #ff0000;
+        --incorrect-border: #ffffff;
+    }
+    
+    /* Large Text Mode */
+    body.large-text {
+        --font-size-base: 22px;
+        --font-size-lg: 28px;
+    }
+
+    /* ===========================
+       GLOBAL STYLES
+    =========================== */
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.25s, color 0.25s;
+      font-size: var(--font-size-base);
+    }
+
+    h1 {
+      margin-bottom: 0;
+      font-size: calc(var(--font-size-lg) * 1.5);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      margin-bottom: 20px;
+      color: #ff66a3;
+      font-weight: normal;
+      font-size: var(--font-size-base);
+    }
+
+    /* ===========================
+       CONTROLS BAR
+    =========================== */
+    #controls-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .control-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .section-label {
+        font-weight: bold;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        color: #888;
+        margin-right: 5px;
+    }
+
+    /* ===========================
+       BUTTONS & INPUTS
+    =========================== */
+    button, select, input[type="text"] {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--button-border);
+      background: var(--button-bg);
+      cursor: pointer;
+      font-size: var(--font-size-base);
+      color: var(--text);
+      transition: background 0.2s, transform 0.15s;
+      min-height: 40px;
+    }
+
+    button:hover {
+      background: var(--button-hover);
+      transform: scale(1.03);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      transform: none;
+    }
+    
+    button.active {
+        background: var(--button-active-bg);
+        color: var(--button-active-text);
+        font-weight: bold;
+        border-color: var(--button-active-bg);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      cursor: text;
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    /* Mode Buttons (Study, Exam, Flashcards, Game) */
+    .mode-btn.active-mode {
+        background: #ff66a3;
+        color: white;
+        border-color: #ff3385;
+        box-shadow: 0 0 8px rgba(255, 102, 163, 0.4);
+    }
+
+    /* ===========================
+       QUIZ AREA
+    =========================== */
+    #quiz-area {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      transition: background 0.25s;
+      border: 1px solid var(--border-color);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #question-text {
+      font-size: var(--font-size-lg);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    /* ===========================
+       INPUT CONTAINERS
+    =========================== */
+    #options-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    #text-input-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+        #options-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .option-btn {
+      padding: 16px;
+      font-size: var(--font-size-base);
+      border-radius: 10px;
+      border: 1px solid var(--button-border);
+      background: var(--button-bg);
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+
+    .option-btn.selected {
+      border-color: #6666ff;
+      box-shadow: 0 0 4px rgba(0,0,0,0.2);
+      background-color: #e6e6ff;
+    }
+    
+    .dark-mode .option-btn.selected {
+        background-color: #4a4a6a;
+    }
+
+    .option-btn.correct {
+      background: var(--correct) !important;
+      border-color: var(--correct-border) !important;
+      color: #000;
+    }
+
+    .option-btn.incorrect {
+      background: var(--incorrect) !important;
+      border-color: var(--incorrect-border) !important;
+      color: #000;
+    }
+
+    /* Self-grading buttons */
+    #self-grade-buttons {
+        display: none;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: center;
+    }
+    #btn-got-it { background: #b6ffb6; border-color: #6ecf6e; color: #000; }
+    #btn-missed-it { background: #ffbaba; border-color: #e57373; color: #000; }
+
+    /* ===========================
+       FLASHCARD STYLES
+    =========================== */
+    #flashcard-container {
+        display: none;
+        perspective: 1000px;
+        width: 100%;
+        height: 300px;
+        cursor: pointer;
+    }
+
+    #flashcard-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .flashcard-flipped #flashcard-inner {
+        transform: rotateY(180deg);
+    }
+
+    /* Reduce motion override */
+    body.reduce-motion #flashcard-inner {
+        transition: none;
+    }
+
+    .flashcard-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        border: 2px solid var(--button-border);
+        background: var(--card-bg);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .flashcard-front {
+        background: var(--button-bg);
+    }
+
+    .flashcard-back {
+        background: var(--card-bg);
+        transform: rotateY(180deg);
+    }
+
+    .fc-label {
+        font-size: 0.8em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 10px;
+    }
+    
+    .fc-content {
+        font-size: var(--font-size-lg);
+        font-weight: bold;
+    }
+
+    /* ===========================
+       CHECKBOX GROUP (PILLS)
+    =========================== */
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .pill-checkbox {
+        display: none;
+    }
+
+    .pill-label {
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--button-border);
+        background: var(--card-bg);
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: all 0.2s;
+    }
+
+    .pill-checkbox:checked + .pill-label {
+        background: var(--button-active-bg);
+        color: var(--button-active-text);
+        border-color: var(--button-active-bg);
+    }
+
+    /* ===========================
+       FEEDBACK & HUD
+    =========================== */
+    #feedback {
+      min-height: 24px;
+      margin: 15px 0;
+      font-weight: bold;
+      font-size: var(--font-size-lg);
+    }
+
+    #bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* ===========================
+       QUIZ CATEGORY GRID
+    =========================== */
+    #quiz-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+      width: 100%;
+      text-align: left;
+      margin-top: 10px;
+    }
+
+    #quiz-checkboxes label {
+      cursor: pointer;
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      background: rgba(0,0,0,0.03);
+      border-radius: 4px;
+    }
+    
+    .dark-mode #quiz-checkboxes label {
+        background: rgba(255,255,255,0.05);
+    }
+
+    /* ===========================
+       TIMER (GAME MODE)
+    =========================== */
+    #game-hud {
+        display: none;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: var(--font-size-lg);
+    }
+    #timer-display { color: #ff66a3; }
+    .time-added { color: green; animation: floatUp 1s forwards; position: absolute; }
+    .time-lost { color: red; animation: floatUp 1s forwards; position: absolute; }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(-20px); opacity: 0; }
+    }
+
+    /* ===========================
+       PROGRESS BAR
+    =========================== */
+    #progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--progress-bg);
+      border-radius: 4px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    #progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--progress-fill);
+      border-radius: 4px;
+      transition: width 0.3s ease-in-out;
+    }
+
+    /* ===========================
+       ANIMATIONS
+    =========================== */
+    .fade { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* DISCO MODE */
+    #disco-ball {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 40px;
+      cursor: pointer;
+      z-index: 9999;
+    }
+    
+    /* Gentle Fade for Disco */
+    .disco-bg {
+      animation: discoFade 8s infinite alternate;
+    }
+    @keyframes discoFade {
+      0%   { background-color: #ffecf2; }
+      25%  { background-color: #ebeafc; }
+      50%  { background-color: #e0f7ff; }
+      75%  { background-color: #e0ffe0; }
+      100% { background-color: #fff5e0; }
+    }
+    .dark-mode .disco-bg {
+        animation: discoFadeDark 8s infinite alternate;
+    }
+    @keyframes discoFadeDark {
+        0%   { background-color: #4a1a2c; }
+        25%  { background-color: #1a1a4a; }
+        50%  { background-color: #1a3a4a; }
+        75%  { background-color: #1a4a1a; }
+        100% { background-color: #4a3a1a; }
+    }
+
+    /* ===========================
+       INSTRUCTIONS OVERLAY
+    =========================== */
+    #instructions-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        flex-direction: column;
+        padding: 20px;
+    }
+    #instructions-content {
+        background: #333;
+        padding: 30px;
+        border-radius: 15px;
+        max-width: 500px;
+        text-align: center;
+        border: 2px solid #ff66a3;
+    }
+    
+    /* ===========================
+       ACCESSIBILITY PANEL
+    =========================== */
+    #a11y-panel {
+        display: none; /* hidden by default */
+        padding: 10px;
+        background: rgba(0,0,0,0.05);
+        border-radius: 8px;
+        margin-top: 10px;
+        width: 100%;
+    }
+    #a11y-panel.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- DISCO BALL BUTTON -->
+  <div id="disco-ball" title="Disco Mode (Gentle)">🪩</div>
+
+  <!-- GAME INSTRUCTIONS OVERLAY -->
+  <div id="instructions-overlay">
+      <div id="instructions-content">
+          <h2 style="color:#ff66a3;">TIME ATTACK MODE</h2>
+          <p style="font-size:1.2em;">Answer as many questions as possible before time runs out!</p>
+          <ul style="text-align:left; font-size:1.1em; line-height:1.6;">
+              <li>⏱️ Start with <strong>60 Seconds</strong></li>
+              <li>✅ Correct Answer: <strong>+3 Seconds</strong></li>
+              <li>❌ Wrong Answer: <strong>-5 Seconds</strong></li>
+          </ul>
+          <button id="btn-start-game" style="background:#ff66a3; color:white; font-size:1.2em; padding:10px 30px;">START GAME</button>
+          <br><br>
+          <button id="btn-cancel-game" style="background:transparent; border:1px solid #aaa; color:#aaa;">Cancel</button>
+      </div>
+  </div>
+
+  <h1>Top 200 Drugs Quiz</h1>
+  <h2 class="subtitle">Built for no apparent reason</h2>
+
+  <!-- Progress Bar -->
+  <div id="progress-bar">
+    <div id="progress-fill"></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div id="controls-bar">
+
+    <!-- MODE SELECTION ROW -->
+    <div class="control-row">
+        <span class="section-label">Mode:</span>
+        <button class="mode-btn active-mode" data-mode="study">Study</button>
+        <button class="mode-btn" data-mode="exam">Exam</button>
+        <button class="mode-btn" data-mode="flashcards">Flashcards</button>
+        <button class="mode-btn" data-mode="game">Time Attack</button>
+    </div>
+
+    <!-- QUIZ TYPES (Multi-Select) -->
+    <div class="control-row" id="quiz-types-row">
+        <span class="section-label">Questions:</span>
+        <div class="checkbox-group">
+            <input type="checkbox" id="qm1" class="pill-checkbox quiz-mode-check" value="gen_brand" checked>
+            <label for="qm1" class="pill-label">Gen → Brand</label>
+
+            <input type="checkbox" id="qm2" class="pill-checkbox quiz-mode-check" value="brand_gen">
+            <label for="qm2" class="pill-label">Brand → Gen</label>
+
+            <input type="checkbox" id="qm3" class="pill-checkbox quiz-mode-check" value="gen_ind">
+            <label for="qm3" class="pill-label">Gen → Ind</label>
+
+            <input type="checkbox" id="qm4" class="pill-checkbox quiz-mode-check" value="brand_ind">
+            <label for="qm4" class="pill-label">Brand → Ind</label>
+
+            <input type="checkbox" id="qm5" class="pill-checkbox quiz-mode-check" value="ind_gen">
+            <label for="qm5" class="pill-label">Ind → Gen</label>
+
+            <input type="checkbox" id="qm6" class="pill-checkbox quiz-mode-check" value="ind_brand">
+            <label for="qm6" class="pill-label">Ind → Brand</label>
+        </div>
+    </div>
+
+    <!-- SETTINGS ROW -->
+    <div class="control-row">
+        <div class="control-group" id="input-method-group">
+            <span>Input:</span>
+            <button class="input-btn active" data-input="buttons">Buttons</button>
+            <button class="input-btn" data-input="text">Type</button>
+        </div>
+
+        <div class="control-group" id="length-group">
+            <span>Length:</span>
+            <select id="num-questions">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="0">Endless</option>
+            </select>
+        </div>
+
+        <button id="btn-a11y-toggle">Accessibility ⚙️</button>
+    </div>
+
+    <!-- ACCESSIBILITY PANEL -->
+    <div id="a11y-panel">
+        <button id="btn-theme-toggle">Dark Mode</button>
+        <button id="btn-large-text">Large Text: OFF</button>
+        <button id="btn-reduce-motion">Reduce Motion: OFF</button>
+        <button id="btn-high-contrast">High Contrast: OFF</button>
+    </div>
+
+    <!-- DRUG SET SELECTION -->
+    <div class="control-row" style="align-items:flex-start;">
+        <details style="width:100%;">
+            <summary style="cursor:pointer; font-weight:bold; margin-bottom:5px;">Select Quizzes (Fall/Winter)</summary>
+            <div id="quiz-checkboxes">
+                <!-- FALL -->
+                <label><input type="checkbox" class="quiz-check" value="F1" checked> F1: Asthma/Allergies</label>
+                <label><input type="checkbox" class="quiz-check" value="F2" checked> F2: Diabetes/Antiplatelet</label>
+                <label><input type="checkbox" class="quiz-check" value="F3" checked> F3: Insomnia/Pain/Stim</label>
+                <label><input type="checkbox" class="quiz-check" value="F4" checked> F4: GI/Supplements</label>
+                <label><input type="checkbox" class="quiz-check" value="F5" checked> F5: Women’s/Men’s</label>
+                <label><input type="checkbox" class="quiz-check" value="F6" checked> F6: HTN/Lipids</label>
+                <label><input type="checkbox" class="quiz-check" value="F7" checked> F7: Antibiotics I</label>
+                <label><input type="checkbox" class="quiz-check" value="F8" checked> F8: Antibiotics II/Topical</label>
+                <label><input type="checkbox" class="quiz-check" value="F9" checked> F9: Antidepressants</label>
+                <label><input type="checkbox" class="quiz-check" value="F10" checked> F10: Antipsychotics</label>
+
+                <!-- WINTER -->
+                <label><input type="checkbox" class="quiz-check" value="W1" checked> W1: Cardio I</label>
+                <label><input type="checkbox" class="quiz-check" value="W2" checked> W2: Cardio II</label>
+                <label><input type="checkbox" class="quiz-check" value="W3" checked> W3: Cardio III</label>
+                <label><input type="checkbox" class="quiz-check" value="W4" checked> W4: Pain I</label>
+                <label><input type="checkbox" class="quiz-check" value="W5" checked> W5: Pain II</label>
+                <label><input type="checkbox" class="quiz-check" value="W6" checked> W6: Women/Men/HIV</label>
+                <label><input type="checkbox" class="quiz-check" value="W7" checked> W7: Asthma/COPD</label>
+                <label><input type="checkbox" class="quiz-check" value="W8" checked> W8: Neurology</label>
+                <label><input type="checkbox" class="quiz-check" value="W9" checked> W9: Misc</label>
+            </div>
+            <div style="margin-top:10px;">
+                <button id="select-all-quizzes">All</button>
+                <button id="clear-all-quizzes">None</button>
+            </div>
+        </details>
+    </div>
+
+    <button id="start-quiz" style="background:#ff66a3; color:white; font-weight:bold; width:100%;">START SESSION</button>
+    <button id="start-smart-review" style="display:none; background:#ffcce0; border-color:#ff66a3;">Review Missed Items</button>
+
+  </div>
+
+  <!-- QUIZ AREA -->
+  <div id="quiz-area">
+    
+    <!-- GAME HUD (Timer/Score) -->
+    <div id="game-hud">
+        <span>Time: <span id="timer-display">60</span>s</span>
+        <span>Score: <span id="game-score">0</span></span>
+    </div>
+
+    <div id="question-text">Welcome! Select settings above and click Start.</div>
+    
+    <!-- Button Options -->
+    <div id="options-container"></div>
+
+    <!-- Text Input Area -->
+    <div id="text-input-container">
+        <input type="text" id="answer-input" placeholder="Type answer here..." autocomplete="off">
+        <div style="font-size: 0.8em; color: #888; margin-top:5px;">(Press Enter to submit)</div>
+    </div>
+
+    <!-- FLASHCARD UI -->
+    <div id="flashcard-container">
+        <div id="flashcard-inner">
+            <div class="flashcard-face flashcard-front">
+                <div class="fc-label">Question</div>
+                <div class="fc-content" id="fc-front-text">Front</div>
+                <div style="margin-top:20px; font-size:0.8em; color:#666;">(Click to flip)</div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div class="fc-label">Answer</div>
+                <div class="fc-content" id="fc-back-text">Back</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback"></div>
+
+    <!-- Self Grade Buttons -->
+    <div id="self-grade-buttons">
+        <button id="btn-got-it">I got it</button>
+        <button id="btn-missed-it">I missed it</button>
+    </div>
+
+    <div id="bottom-bar">
+      <span id="progress"></span>
+      <span id="score"></span>
+      <div class="bottom-buttons">
+        <button id="check-answer" disabled style="display:none;">Check</button>
+        <button id="next-question" disabled style="display:none;">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =====================================
+    // UTILS
+    // =====================================
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function shootConfetti() {
+        if (document.body.classList.contains("reduce-motion")) return;
+        if (typeof confetti !== 'function') return;
+
+      const bursts = [
+        { x: 0,   y: 0 }, { x: 1,   y: 0 },
+        { x: 0,   y: 1 }, { x: 1,   y: 1 },
+        { x: 0.5, y: 0.5 }
+      ];
+
+      bursts.forEach(origin => {
+        confetti({ particleCount: 150, spread: 100, startVelocity: 40, origin });
+      });
+    }
+
+    function launchDiscoConfetti() {
+      if (document.body.classList.contains("reduce-motion")) return;
+      if (typeof confetti !== 'function') return;
+      
+      const colors = ['#ff66a3', '#6a5acd', '#39d0ff', '#32cd32', '#ffa500'];
+      for (let i = 0; i < 5; i++) {
+        confetti({
+          particleCount: 60, spread: 120, startVelocity: 30,
+          origin: { x: Math.random(), y: Math.random() },
+          colors: colors
+        });
+      }
+    }
+
+    // =====================================
+    // DATA
+    // =====================================
+    const fallDrugs = [
+      { "generic": "Albuterol", "brand": ["ProAir HFA", "ProAir Respiclick", "Proventil HFA", "Ventolin HFA"], "class": "Selective beta2 adrenergic agonist", "indications": ["Asthma", "Exercise induced asthma"], "quiz": "F1" },
+      { "generic": "Montelukast", "brand": ["Singulair"], "class": "Leukotriene receptor antagonist", "indications": ["Asthma", "Exercise induced bronchoconstriction", "Seasonal allergic rhinitis"], "quiz": "F1" },
+      { "generic": "Hydroxyzine", "brand": ["Atarax", "Vistaril"], "class": "1st generation antihistamine", "indications": ["Anxiety", "Pruritis", "Sedation"], "quiz": "F1" },
+      { "generic": "Meclizine", "brand": ["Antivert", "Dramamine"], "class": "", "indications": ["Motion sickness", "Vertigo"], "quiz": "F1" },
+      { "generic": "Cetirizine", "brand": ["Zyrtec"], "class": "2nd generation antihistamine", "indications": ["Allergic rhinitis", "Urticaria"], "quiz": "F1" },
+      { "generic": "Fexofenadine", "brand": ["Allegra"], "class": "", "indications": ["Seasonal allergic rhinitis", "Urticaria"], "quiz": "F1" },
+      { "generic": "Epinephrine", "brand": ["Auvi-Q", "EpiPen"], "class": "Anaphylaxis agent", "indications": ["Emergency treatment of anaphylaxis due to allergic reactions"], "quiz": "F1" },
+      { "generic": "Metformin", "brand": ["Glucophage"], "class": "Biguanide", "indications": ["Type 2 diabetes mellitus", "Polycystic ovary syndrome"], "quiz": "F2" },
+      { "generic": "Glimepiride", "brand": ["Amaryl"], "class": "Sulfonylurea", "indications": ["Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Glipizide", "brand": ["Glucotrol"], "class": "Sulfonylurea", "indications": ["Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Sitagliptin", "brand": ["Januvia"], "class": "Dipeptidyl peptidase-4 inhibitor (DPP4 inhibitor)", "indications": ["Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Pioglitazone", "brand": ["Actos"], "class": "Thiazolidinedione", "indications": ["Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Insulin Aspart", "brand": ["NovoLog", "Novolog FlexPen"], "class": "Rapid acting insulin", "indications": ["Type 1 diabetes mellitus", "Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Insulin Glargine", "brand": ["Lantus"], "class": "Long acting insulin", "indications": ["Type 1 diabetes mellitus", "Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Clopidogrel", "brand": ["Plavix"], "class": "Platelet aggregation inhibitor", "indications": ["Myocardial infarction", "Prevention of thrombosis in arteriosclerotic vascular disease"], "quiz": "F2" },
+      { "generic": "Dapagliflozin", "brand": ["Farxiga"], "class": "SGLT2 inhibitor", "indications": ["Type 2 diabetes mellitus", "Heart failure", "Chronic kidney disease"], "quiz": "F2" },
+      { "generic": "Empagliflozin", "brand": ["Jardiance"], "class": "SGLT2 inhibitor", "indications": ["Type 2 diabetes mellitus", "Heart failure", "Chronic kidney disease"], "quiz": "F2" },
+      { "generic": "Semaglutide", "brand": ["Ozempic", "Rybelsus", "Wegovy"], "class": "GLP-1 receptor agonist", "indications": ["Type 2 diabetes mellitus", "Weight loss (Wegovy only)"], "quiz": "F2" },
+      { "generic": "Dulaglutide", "brand": ["Trulicity"], "class": "GLP-1 receptor agonist", "indications": ["Type 2 diabetes mellitus"], "quiz": "F2" },
+      { "generic": "Zolpidem", "brand": ["Ambien"], "class": "Nonbarbiturate hypnotic (C-IV)", "indications": ["Insomnia"], "quiz": "F3" },
+      { "generic": "Eszopiclone", "brand": ["Lunesta"], "class": "Nonbarbiturate hypnotic", "indications": ["Insomnia"], "quiz": "F3" },
+      { "generic": "Hydrocodone and acetaminophen", "brand": [], "class": "Opioid analgesic (C-II)", "indications": ["Pain (severe)"], "quiz": "F3" },
+      { "generic": "Ibuprofen", "brand": ["Motrin"], "class": "Nonsteroidal anti inflammatory drug", "indications": ["Fever", "Osteoarthritis", "Pain", "Rheumatoid arthritis"], "quiz": "F3" },
+      { "generic": "Meloxicam", "brand": ["Mobic"], "class": "Nonsteroidal anti inflammatory drug", "indindications": ["Osteoarthritis", "Rheumatoid arthritis"], "quiz": "F3" },
+      { "generic": "Lisdexamfetamine", "brand": ["Vyvanse"], "class": "CNS stimulant (C-II)", "indications": ["ADHD", "Binge eating disorder"], "quiz": "F3" },
+      { "generic": "Methylphenidate", "brand": ["Concerta", "Ritalin"], "class": "CNS stimulant (C-II)", "indications": ["ADHD", "Narcolepsy"], "quiz": "F3" },
+      { "generic": "Atomoxetine", "brand": ["Strattera"], "class": "Norepinephrine reuptake inhibitor (NRI)", "indications": ["ADHD"], "quiz": "F3" },
+      { "generic": "Donepezil", "brand": ["Aricept"], "class": "Central cholinesterase inhibitor", "indications": ["Alzheimer disease", "Dementia"], "quiz": "F3" },
+      { "generic": "Memantine", "brand": ["Namenda"], "class": "NMDA receptor antagonist", "indications": ["Alzheimer disease"], "quiz": "F3" },
+      { "generic": "Esomeprazole", "brand": ["Nexium"], "class": "Proton pump inhibitor (PPI)", "indications": ["Helicobacter pylori GI tract infection", "Gastroesophageal reflux disease (GERD)", "Prevention of NSAID induced gastropathy", "Zollinger Ellison syndrome"], "quiz": "F4" },
+      { "generic": "Pantoprazole", "brand": ["Protonix"], "class": "Proton pump inhibitor (PPI)", "indications": ["Gastroesophageal reflux disease (GERD)", "Gastric hypersecretion", "Zollinger Ellison syndrome"], "quiz": "F4" },
+      { "generic": "Omeprazole", "brand": ["Prilosec"], "class": "Proton pump inhibitor (PPI)", "indications": ["Duodenal or gastric ulcer disease", "Gastroesophageal reflux disease (GERD)", "Helicobacter pylori GI tract infection (triple therapy)"], "quiz": "F4" },
+      { "generic": "Lansoprazole", "brand": ["Prevacid"], "class": "Proton pump inhibitor (PPI)", "indications": ["Duodenal or gastric ulcer disease", "Gastroesophageal reflux disease (GERD)", "Helicobacter pylori GI tract infection (triple therapy)"], "quiz": "F4" },
+      { "generic": "Famotidine", "brand": ["Pepcid"], "class": "Histamine H2 receptor antagonist (H2RA)", "indications": ["Duodenal or gastric ulcer disease", "Gastroesophageal reflux disease (GERD)"], "quiz": "F4" },
+      { "generic": "Polyethylene Glycol", "brand": ["Golytely"], "class": "Hyperosmotic laxative", "indications": ["Colonoscopy or barium enema preparation", "Constipation"], "quiz": "F4" },
+      { "generic": "Cyanocobalamin", "brand": ["Cobolin-M"], "class": "Essential vitamin", "indications": ["Cobalamin (vitamin B12) deficiency"], "quiz": "F4" },
+      { "generic": "Potassium Chloride", "brand": ["Klor-Con"], "class": "Electrol​yte, potassium", "indications": ["Hypokalemia"], "quiz": "F4" },
+      { "generic": "Sildenafil", "brand": ["Viagra", "Revatio"], "class": "Phosphodiesterase-5 inhibitor (PDE-5 inhibitor)", "indications": ["Erectile dysfunction", "Pulmonary hypertension"], "quiz": "F5" },
+      { "generic": "Tadalafil", "brand": ["Adcirca", "Cialis"], "class": "Phosphodiesterase-5 inhibitor (PDE-5 inhibitor)", "indications": ["Benign prostatic hyperplasia", "Erectile dysfunction", "Pulmonary hypertension"], "quiz": "F5" },
+      { "generic": "Tamsulosin", "brand": ["Flomax"], "class": "Alpha-1 adrenergic blocker", "indications": ["Benign prostatic hyperplasia"], "quiz": "F5" },
+      { "generic": "Tolterodine", "brand": ["Detrol", "Detrol LA"], "class": "Antimuscarinic", "indications": ["Overactive bladder"], "quiz": "F5" },
+      { "generic": "Oxybutynin", "brand": ["Ditropan"], "class": "Urinary antispasmodic", "indications": ["Overactive bladder", "Neurogenic bladder"], "quiz": "F5" },
+      { "generic": "Levothyroxine", "brand": ["Synthroid"], "class": "Thyroid supplement", "indications": ["Hypothyroidism"], "quiz": "F5" },
+      { "generic": "Thyroid", "brand": ["Armour Thyroid"], "class": "Thyroid supplement", "indications": ["Hypothyroidism"], "quiz": "F5" },
+      { "generic": "Alendronate", "brand": ["Fosamax", "Binosto"], "class": "Bisphosphonate", "indications": ["Postmenopausal osteoporosis (treatment or prophylaxis)", "Osteoporosis in men", "Glucocorticoid induced osteoporosis", "Paget disease"], "quiz": "F5" },
+      { "generic": "Ibandronate", "brand": ["Boniva"], "class": "Bisphosphonate", "indications": ["Postmenopausal osteoporosis", "Prevention of postmenopausal osteoporosis"], "quiz": "F5" },
+      { "generic": "Risedronate", "brand": ["Actonel", "Atelvia"], "class": "Bisphosphonate", "indications": ["Postmenopausal osteoporosis", "Paget disease", "Glucocorticoid induced osteoporosis", "Osteoporosis in men"], "quiz": "F5" },
+      { "generic": "Raloxifene", "brand": ["Evista"], "class": "Selective estrogen receptor modulator (SERM)", "indications": ["Prevention of breast cancer in postmenopausal women", "Prevention or treatment of postmenopausal osteoporosis"], "quiz": "F5" },
+      { "generic": "Lisinopril", "brand": ["Prinivil", "Zestril"], "class": "Angiotensin converting enzyme (ACE) inhibitor", "indications": ["Heart failure", "Hypertension", "Myocardial infarction"], "quiz": "F6" },
+      { "generic": "Ramipril", "brand": ["Altace"], "class": "Angiotensin converting enzyme (ACE) inhibitor", "indications": ["Heart failure", "Hypertension", "Reduce risk of cardiovascular events and death"], "quiz": "F6" },
+      { "generic": "Losartan", "brand": ["Cozaar"], "class": "Angiotensin II receptor blocker (ARB)", "indications": ["Diabetic nephropathy", "Hypertension"], "quiz": "F6" },
+      { "generic": "Atenolol", "brand": ["Tenormin"], "class": "Beta adrenergic blocker, cardioselective", "indications": ["Angina", "Hypertension"], "quiz": "F6" },
+      { "generic": "Metoprolol", "brand": ["Lopressor", "Toprol XL"], "class": "Beta adrenergic blocker", "indications": ["Angina", "Heart failure", "Hypertension", "Myocardial infarction"], "quiz": "F6" },
+      { "generic": "Amlodipine", "brand": ["Norvasc"], "class": "Calcium channel blocker", "indications": ["Angina", "Hypertension"], "quiz": "F6" },
+      { "generic": "Furosemide", "brand": ["Lasix"], "class": "Loop diuretic", "indications": ["Edema", "Hypertension"], "quiz": "F6" },
+      { "generic": "Hydrochlorothiazide", "brand": [], "class": "Thiazide diuretic", "indications": ["Edema", "Hypertension"], "quiz": "F6" },
+      { "generic": "Atorvastatin", "brand": ["Lipitor"], "class": "HMG-CoA reductase inhibitor", "indications": ["Hyperlipidemia", "Primary and secondary prevention of ASCVD", "Familial hypercholesterolemia"], "quiz": "F6" },
+      { "generic": "Simvastatin", "brand": ["Zocor"], "class": "HMG-CoA reductase inhibitor", "indications": ["Hyperlipidemia", "Primary and secondary prevention of ASCVD", "Familial hypercholesterolemia"], "quiz": "F6" },
+      { "generic": "Fenofibrate", "brand": ["Lofibra", "Tricor"], "class": "Antihyperlipidemic", "indications": ["Hypercholesterolemia", "Hypertriglyceridemia"], "quiz": "F6" },
+      { "generic": "Azithromycin", "brand": ["Zithromax", "Z-Pak"], "class": "Macrolide antibiotic", "indications": ["Bacterial sinusitis", "Community acquired pneumonia", "Streptococcal pharyngitis"], "quiz": "F7" },
+      { "generic": "Ciprofloxacin (oral)", "brand": ["Cipro", "Cipro XR"], "class": "Fluoroquinolone antibiotic", "indications": ["Bronchitis", "Sinusitis", "Urinary tract infection"], "quiz": "F7" },
+      { "generic": "Ciprofloxacin (ear)", "brand": ["Cetraxal", "Otiprio"], "class": "Fluoroquinolone antibiotic", "indications": ["Otitis externa", "Otitis media with effusion"], "quiz": "F7" },
+      { "generic": "Levofloxacin", "brand": ["Levaquin"], "class": "Fluoroquinolone antibiotic", "indications": ["Bacterial sinusitis", "Bronchitis", "Community acquired pneumonia"], "quiz": "F7" },
+      { "generic": "Amoxicillin", "brand": ["Amoxil"], "class": "Beta-lactam antibiotic", "indications": ["Acute otitis media", "Streptococcal pharyngitis"], "quiz": "F7" },
+      { "generic": "Penicillin", "brand": [], "class": "Beta-lactam antibiotic", "indications": ["Otitis media", "Streptococcal pharyngitis"], "quiz": "F7" },
+      { "generic": "Amoxicillin/Clavulanate", "brand": ["Augmentin"], "class": "Beta-lactam antibiotic + Beta-lactamase inhibitor", "indications": ["Otitis media", "Sinusitis", "Urinary tract infections"], "quiz": "F7" },
+      { "generic": "Cephalexin", "brand": ["Keflex"], "class": "First generation cephalosporin", "indications": ["Otitis media", "Urinary tract infection", "Streptococcal pharyngitis"], "quiz": "F7" },
+      { "generic": "Cefdinir", "brand": ["Omnicef"], "class": "Third generation cephalosporin", "indications": ["Acute otitis media", "Pharyngitis", "Bronchitis", "Community acquired pneumonia"], "quiz": "F7" },
+      { "generic": "Valacyclovir", "brand": ["Valtrex"], "class": "Viral DNA polymerase inhibitor", "indications": ["Genital herpes simplex", "Herpes zoster", "Varicella"], "quiz": "F7" },
+      { "generic": "Oseltamivir", "brand": ["Tamiflu"], "class": "Neuraminidase inhibitor (antiviral)", "indications": ["Influenza types A and B: treatment and prophylaxis"], "quiz": "F7" },
+      { "generic": "Clindamycin (oral)", "brand": ["Cleocin"], "class": "Lincosamide antibiotic", "indications": ["Infection of skin and subcutaneous tissue", "Lower respiratory tract infection"], "quiz": "F8" },
+      { "generic": "Clindamycin (topical)", "brand": ["Cleocin T"], "class": "Lincosamide antibiotic", "indications": ["Acne vulgaris"], "quiz": "F8" },
+      { "generic": "Doxycycline", "brand": ["Vibramycin"], "class": "Tetracycline antibiotic", "indications": ["Acne vulgaris", "Staphylococcal infection of the skin"], "quiz": "F8" },
+      { "generic": "Metronidazole", "brand": ["Flagyl"], "class": "Nitroimidazole antibiotic, antiprotozoal", "indications": ["Abscess"], "quiz": "F8" },
+      { "generic": "Chlorhexidine Gluconate", "brand": ["Peridex", "Hibiclens"], "class": "Antibacterial cleansing agent", "indications": ["Gingivitis", "Skin or wound cleansing"], "quiz": "F8" },
+      { "generic": "Mupirocin", "brand": ["Bactroban"], "class": "Topical antibiotic", "indications": ["Impetigo"], "quiz": "F8" },
+      { "generic": "Nitrofurantoin", "brand": ["Macrodantin", "Macrobid"], "class": "Nitrofuran antibiotic", "indications": ["Urinary tract infection"], "quiz": "F8" },
+      { "generic": "Trimethoprim-Sulfamethoxazole", "brand": ["Bactrim", "Septra"], "class": "Sulfonamide antibiotic", "indications": ["Urinary tract infection"], "quiz": "F8" },
+      { "generic": "Fluconazole", "brand": ["Diflucan"], "class": "Imidazole antifungal", "indications": ["Candidiasis"], "quiz": "F8" },
+      { "generic": "Ketoconazole", "brand": ["Nizoral"], "class": "Imidazole antifungal", "indications": ["Dandruff", "Tinea corporis", "Tinea cruris", "Tinea pedis"], "quiz": "F8" },
+      { "generic": "Nystatin (systemic)", "brand": ["Bio-Statin"], "class": "Polyene antifungal", "indications": ["Oropharyngeal candidiasis"], "quiz": "F8" },
+      { "generic": "Nystatin (topical)", "brand": ["Mycostatin", "Nyamyc", "Nystop"], "class": "Polyene antifungal", "indications": ["Candidiasis of the skin"], "quiz": "F8" },
+      { "generic": "Clobetasol", "brand": ["Temovate"], "class": "Topical corticosteroid", "indications": ["Plaque psoriasis"], "quiz": "F8" },
+      { "generic": "Prednisone", "brand": ["Deltasone"], "class": "Corticosteroid", "indications": ["Disorders due to inflammatory response (asthma, ulcerative colitis, multiple sclerosis, rheumatoid arthritis)"], "quiz": "F8" },
+      { "generic": "Amitriptyline", "brand": ["Elavil"], "class": "Tricyclic antidepressant", "indications": ["Depression"], "quiz": "F9" },
+      { "generic": "Nortriptyline", "brand": ["Pamelor"], "class": "Tricyclic antidepressant", "indications": ["Depression"], "quiz": "F9" },
+      { "generic": "Citalopram", "brand": ["Celexa"], "class": "Selective serotonin reuptake inhibitor (SSRI)", "indications": ["Depression"], "quiz": "F9" },
+      { "generic": "Paroxetine", "brand": ["Paxil", "Paxil CR"], "class": "Selective serotonin reuptake inhibitor (SSRI)", "indications": ["Depression", "Generalized anxiety disorder", "Social anxiety disorder", "Obsessive compulsive disorder", "Panic disorder", "Posttraumatic stress disorder", "Premenstrual dysphoric disorder", "Vasomotor symptoms of menopause"], "quiz": "F9" },
+      { "generic": "Escitalopram", "brand": ["Lexapro"], "class": "Selective serotonin reuptake inhibitor (SSRI)", "indications": ["Depression", "Generalized anxiety disorder"], "quiz": "F9" },
+      { "generic": "Fluoxetine", "brand": ["Prozac", "Sarafem"], "class": "Selective serotonin reuptake inhibitor (SSRI)", "indications": ["Depression", "Obsessive compulsive disorder", "Panic disorder", "Premenstrual dysphoric disorder"], "quiz": "F9" },
+      { "generic": "Sertraline", "brand": ["Zoloft"], "class": "Selective serotonin reuptake inhibitor (SSRI)", "indications": ["Depression", "Obsessive compulsive disorder", "Panic disorder", "Premenstrual dysphoric disorder"], "quiz": "F9" },
+      { "generic": "Duloxetine", "brand": ["Cymbalta"], "class": "Serotonin norepinephrine reuptake inhibitor (SNRI)", "indications": ["Anxiety", "Depression", "Diabetic peripheral neuropathy pain"], "quiz": "F9" },
+      { "generic": "Venlafaxine", "brand": ["Effexor", "Effexor XR"], "class": "Serotonin norepinephrine reuptake inhibitor (SNRI)", "indications": ["Depression", "Generalized anxiety disorder", "Panic disorder", "Social anxiety disorder"], "quiz": "F9" },
+      { "generic": "Lithium", "brand": ["Eskalith", "Eskalith-CR", "Lithobid"], "class": "Antimanic", "indications": ["Bipolar disorder"], "quiz": "F9" },
+      { "generic": "Mirtazapine", "brand": ["Remeron"], "class": "Antidepressant, alpha-2 antagonist", "indications": ["Depression"], "quiz": "F9" },
+      { "generic": "Bupropion", "brand": ["Wellbutrin", "Zyban"], "class": "Monocyclic antidepressant", "indications": ["Depression", "Seasonal affective disorder", "Smoking cessation assistance"], "quiz": "F9" },
+      { "generic": "Trazodone", "brand": ["Desyrel"], "class": "Antidepressant", "indications": ["Depression (uncommon use)", "Insomnia (typical off-label use)"], "quiz": "F9" },
+      { "generic": "Aripiprazole", "brand": ["Abilify"], "class": "2nd generation (atypical) antipsychotic", "indications": ["Bipolar disorder", "Schizophrenia", "Depression", "Tourette’s disorder"], "quiz": "F10" },
+      { "generic": "Olanzapine", "brand": ["Zyprexa"], "class": "2nd generation (atypical) antipsychotic", "indications": ["Bipolar disorder", "Schizophrenia", "Depression"], "quiz": "F10" },
+      { "generic": "Risperidone", "brand": ["Risperdal"], "class": "2nd generation (atypical) antipsychotic", "indications": ["Irritability associated with autism spectrum disorder", "Bipolar disorder", "Schizophrenia", "Tourette syndrome"], "quiz": "F10" },
+      { "generic": "Quetiapine", "brand": ["Seroquel", "Seroquel XR"], "class": "2nd generation (atypical) antipsychotic", "indications": ["Bipolar disorder", "Major depressive disorder (adjunct)", "Schizophrenia"], "quiz": "F10" },
+      { "generic": "Alprazolam", "brand": ["Xanax"], "class": "Benzodiazepine (C-IV)", "indications": ["Anxiety", "Panic disorder"], "quiz": "F10" },
+      { "generic": "Clonazepam", "brand": ["Klonopin"], "class": "Benzodiazepine (C-IV)", "indications": ["Panic disorder", "Seizure"], "quiz": "F10" },
+      { "generic": "Diazepam", "brand": ["Valium"], "class": "Benzodiazepine (C-IV)", "indications": ["Alcohol withdrawal syndrome", "Anxiety", "Seizure"], "quiz": "F10" },
+      { "generic": "Lorazepam", "brand": ["Ativan"], "class": "Benzodiazepine (C-IV)", "indications": ["Anxiety", "Insomnia due to anxiety or stress"], "quiz": "F10" },
+      { "generic": "Buspirone", "brand": ["BuSpar"], "class": "Antianxiety", "indications": ["Anxiety"], "quiz": "F10" }
+    ];
+
+    const winterDrugs = [
+        { "generic": "Benazepril", "brand": ["Lotensin"], "class": "Angiotensin converting enzyme inhibitor (ACE-I)", "indications": ["Hypertension", "Heart failure"], "quiz": "W1" },
+        { "generic": "Enalapril", "brand": ["Vasotec"], "class": "Angiotensin converting enzyme inhibitor (ACE-I)", "indications": ["Hypertension", "Heart failure"], "quiz": "W1" },
+        { "generic": "Quinapril", "brand": ["Accupril"], "class": "Angiotensin converting enzyme inhibitor (ACE-I)", "indications": ["Hypertension", "Heart failure"], "quiz": "W1" },
+        { "generic": "Irbesartan", "brand": ["Avapro"], "class": "Angiotensin II receptor antagonist (ARB)", "indications": ["Hypertension", "Diabetic nephropathy in patients with type II diabetes"], "quiz": "W1" },
+        { "generic": "Olmesartan", "brand": ["Benicar"], "class": "Angiotensin II receptor antagonist (ARB)", "indications": ["Hypertension"], "quiz": "W1" },
+        { "generic": "Doxazosin", "brand": ["Cardura", "Cardura XL"], "class": "1-adrenergic blocker", "indications": ["Hypertension", "Benign prostatic hyperplasia"], "quiz": "W1" },
+        { "generic": "Terazosin", "brand": ["Hytrin"], "class": "1-adrenergic blocker", "indications": ["Hypertension", "Benign prostatic hyperplasia"], "quiz": "W1" },
+        { "generic": "Carvedilol", "brand": ["Coreg", "Coreg CR"], "class": "/-adrenergic blocker", "indications": ["Hypertension", "Heart failure"], "quiz": "W1" },
+        { "generic": "Labetalol", "brand": ["Normodyne"], "class": "/-adrenergic blocker", "indications": ["Hypertension"], "quiz": "W1" },
+        { "generic": "Propranolol", "brand": ["Inderal", "Inderal LA", "Inderal XL"], "class": "-adrenergic blocker, nonselective", "indications": ["Hypertension", "Angina pectoris", "Cardiac dysrhythmia", "Migraine"], "quiz": "W1" },
+        { "generic": "Diltiazem", "brand": ["Cardizem", "Cartia XT", "Dilt-XR,", "Tiazac"], "class": "Calcium channel blocker (non-dihydropyridine)", "indications": ["Hypertension", "Angina", "Atrial arrhythmia", "Paroxysmal supraventricular tachycardia"], "quiz": "W2" },
+        { "generic": "Verapamil", "brand": ["Calan", "Calan SR"], "class": "Calcium channel blocker (non-dihydropyridine)", "indications": ["Hypertension", "Angina", "Atrial arrhythmia"], "quiz": "W2" },
+        { "generic": "Nifedipine", "brand": ["Adalat CC", "Procardia XL"], "class": "Calcium channel blocker (dihydropyridine)", "indications": ["Hypertension", "Angina"], "quiz": "W2" },
+        { "generic": "Isosorbide Mononitrate", "brand": ["Imdur"], "class": "Nitrate", "indications": ["Angina"], "quiz": "W2" },
+        { "generic": "Nitroglycerin", "brand": ["Minitran", "Nitro-Dur", "Nitrostat"], "class": "Nitrate", "indications": ["Angina", "Anal fissure"], "quiz": "W2" },
+        { "generic": "Spironolactone", "brand": ["Aldactone"], "class": "Potassium-sparing diuretic", "indications": ["Hypertension", "Edema", "Heart failure", "Hypokalemia"], "quiz": "W2" },
+        { "generic": "Triamterene/ hydrochlorothiazide", "brand": ["Dyazide", "Maxide"], "class": "Potassium sparing/ thiazide diuretic combination", "indications": ["Hypertension", "Edema"], "quiz": "W2" },
+        { "generic": "Chlorthalidone", "brand": ["Thalitone"], "class": "Thiazide diuretic", "indications": ["Hypertension", "Edema"], "quiz": "W2" },
+        { "generic": "Clonidine", "brand": ["Catapres"], "class": "2-adrenergic agonist", "indications": ["Hypertension", "Attention-deficit hyperactivity disorder"], "quiz": "W2" },
+        { "generic": "Tizanidine", "brand": ["Zanaflex"], "class": "2-adrenergic agonist", "indications": ["Muscle spasticity"], "quiz": "W2" },
+        { "generic": "Ezetimibe", "brand": ["Zetia"], "class": "Antihyperlipidemic", "indications": ["Hyperlipidemia"], "quiz": "W3" },
+        { "generic": "Gemfibrozil", "brand": ["Lopid"], "class": "Antihyperlipidemic", "indications": ["Hyperlipidemia", "Coronary atherosclerosis"], "quiz": "W3" },
+        { "generic": "Niacin", "brand": ["Niaspan", "Slo-niacin"], "class": "Antihyperlipidemic", "indications": ["Hyperlipidemia", "Myocardial infarction"], "quiz": "W3" },
+        { "generic": "Lovastatin", "brand": ["Altoprev"], "class": "HMG-CoA reductase inhibitor", "indications": ["Hyperlipidemia"], "quiz": "W3" },
+        { "generic": "Pravastatin", "brand": ["Pravachol"], "class": "HMG-CoA reductase inhibitor", "indications": ["Hyperlipidemia", "Cerebrovascular accident prevention"], "quiz": "W3" },
+        { "generic": "Rosuvastatin", "brand": ["Crestor"], "class": "HMG-CoA reductase inhibitor", "indications": ["Hyperlipidemia"], "quiz": "W3" },
+        { "generic": "Prasugrel", "brand": ["Effient"], "class": "Antiplatelet agent", "indications": ["Thromboembolism prevention"], "quiz": "W3" },
+        { "generic": "Dabigatran", "brand": ["Pradaxa"], "class": "Direct oral anticoagulant (DOAC)", "indications": ["Deep vein thrombosis (DVT)", "Pulmonary embolism", "Thromboembolism prevention", "Atrial fibrillation (stroke prevention)"], "quiz": "W3" },
+        { "generic": "Warfarin", "brand": ["Coumadin"], "class": "Anticoagulant", "indications": ["Deep vein thrombosis (DVT)", "Pulmonary embolism", "Thrombosis", "Atrial fibrillation"], "quiz": "W3" },
+        { "generic": "Digoxin", "brand": ["Lanoxin"], "class": "Digitalis glycoside", "indications": ["Heart failure", "Supraventricular tachyarrhythmia"], "quiz": "W3" },
+        { "generic": "Celecoxib", "brand": ["Celebrex"], "class": "Nonsteroidal anti-inflammatory agent", "indications": ["Osteoarthritis", "Rheumatoid arthritis", "Pain"], "quiz": "W4" },
+        { "generic": "Diclofenac", "brand": ["Voltaren (gel)", "Zipsor (oral)", "Zorvolex (oral)"], "class": "Nonsteroidal anti-inflammatory agent", "indications": ["Osteoarthritis", "Rheumatoid arthritis", "Pain", "Dysmenorrhea", "Migraine"], "quiz": "W4" },
+        { "generic": "Indomethacin", "brand": ["Indocin"], "class": "Nonsteroidal anti-inflammatory agent", "indications": ["Osteoarthritis", "Rheumatoid arthritis", "Pain", "Gout"], "quiz": "W4" },
+        { "generic": "Naproxen", "brand": ["Naprosyn"], "class": "Nonsteroidal anti-inflammatory agent", "indications": ["Osteoarthritis", "Rheumatoid arthritis", "Pain", "Gout", "Fever"], "quiz": "W4" },
+        { "generic": "Lidocaine patch", "brand": ["Lidoderm"], "class": "Local anesthetic", "indications": ["Pain (localized)"], "quiz": "W4" },
+        { "generic": "Allopurinol", "brand": ["Zyloprim"], "class": "Xanthine oxidase inhibitor", "indications": ["Gout"], "quiz": "W4" },
+        { "generic": "Colchicine", "brand": ["Colcrys"], "class": "Antigout", "indications": ["Gout"], "quiz": "W4" },
+        { "generic": "Baclofen", "brand": ["Lioresal"], "class": "Centrally acting skeletal muscle relaxant", "indications": ["Spasticity"], "quiz": "W4" },
+        { "generic": "Cyclobenzaprine", "brand": ["Flexeril"], "class": "Centrally acting skeletal muscle relaxant", "indications": ["Spasticity", "Muscle spasm"], "quiz": "W4" },
+        { "generic": "Codeine", "brand": ["Tylenol with Codeine"], "class": "Opioid", "indications": ["Pain", "Cough"], "quiz": "W5" },
+        { "generic": "Fentanyl (Transdermal)", "brand": ["Duragesic"], "class": "Opioid", "indications": ["Pain"], "quiz": "W5" },
+        { "generic": "Methadone", "brand": ["Dolophine"], "class": "Opioid", "indications": ["Pain", "Drug detoxification - opioid abuse"], "quiz": "W5" },
+        { "generic": "Morphine", "brand": ["Kadian", "MS Contin"], "class": "Opioid", "indications": ["Pain"], "quiz": "W5" },
+        { "generic": "Tramadol", "brand": ["Ultram"], "class": "Opioid", "indications": ["Pain"], "quiz": "W5" },
+        { "generic": "Buprenorphine/naloxone", "brand": ["Suboxone"], "class": "Opioid partial agonist and antagonist combination", "indications": ["Opioid use disorder"], "quiz": "W5" },
+        { "generic": "Naloxone", "brand": ["Narcan"], "class": "Opioid antagonist", "indications": ["Opioid overdose"], "quiz": "W5" },
+        { "generic": "Gabapentin", "brand": ["Neurontin"], "class": "Gamma aminobutyric acid (GABA) analog, anticonvulsant", "indications": ["Seizures", "Nerve pain"], "quiz": "W5" },
+        { "generic": "Pregabalin", "brand": ["Lyrica"], "class": "Analgesic, anticonvulsant", "indications": ["Nerve pain", "Seizures", "Fibromyalgia"], "quiz": "W5" },
+        { "generic": "Conjugated estrogen", "brand": ["Premarin"], "class": "Estrogen", "indications": ["Menopause", "Primary ovarian failure"], "quiz": "W6" },
+        { "generic": "Estradiol", "brand": ["Estrace"], "class": "Estrogen", "indications": ["Abnormal vasomotor function", "Menopause", "Breast cancer", "Decreased estrogen level"], "quiz": "W6" },
+        { "generic": "Ethinyl estradiol", "brand": ["NuvaRing"], "class": "Contraceptive", "indications": ["Contraception"], "quiz": "W6" },
+        { "generic": "Oral contraceptives", "brand": ["Various"], "class": "Contraceptive", "indications": ["Contraception", "Acne"], "quiz": "W6" },
+        { "generic": "Medroxyprogesterone", "brand": ["Depo-Provera, Provera"], "class": "Progestin hormone", "indications": ["Breast cancer", "Contraception", "Amenorrhea"], "quiz": "W6" },
+        { "generic": "Testosterone (Topical)", "brand": ["AndroGel, Androderm"], "class": "Androgen", "indications": ["Hypogonadism"], "quiz": "W6" },
+        { "generic": "Finasteride", "brand": ["Proscar, Propecia"], "class": "5-reductase inhibitor", "indications": ["Benign prostatic hyperplasia", "Male pattern alopecia"], "quiz": "W6" },
+        { "generic": "Efavirenz", "brand": ["Sustiva"], "class": "Antiretroviral agent, reverse transcriptase inhibitor", "indications": ["Treatment of HIV-1 infections"], "quiz": "W6" },
+        { "generic": "Emtricitabine/tenofovir", "brand": ["Truvada"], "class": "Antiretroviral agent, reverse transcriptase inhibitor", "indications": ["Treatment of HIV-1 infections", "Prevention of HIV-1"], "quiz": "W6" },
+        { "generic": "Budesonide/formoterol", "brand": ["Symbicort"], "class": "Inhaled corticosteroid/bronchodilator combination", "indications": ["Asthma", "Chronic obstructive pulmonary disease (COPD)"], "quiz": "W7" },
+        { "generic": "Fluticasone nasal", "brand": ["Flonase"], "class": "Intranasal adrenal glucocorticosteroid", "indications": ["Allergic rhinitis", "Non-allergic rhinitis"], "quiz": "W7" },
+        { "generic": "Fluticasone oral", "brand": ["Flovent Diskus"], "class": "Inhaled adrenal corticosteroid", "indications": ["Asthma"], "quiz": "W7" },
+        { "generic": "Fluticasone/salmeterol", "brand": ["Advair Diskus", "Advair HFA", "AirDuo RespiClick"], "class": "Inhaled corticosteroid and long-acting 2-adrenergic agonist combination", "indications": ["Asthma", "Chronic obstructive pulmonary disease (COPD)"], "quiz": "W7" },
+        { "generic": "Ipratropium/albuterol", "brand": ["Combivent respimat"], "class": "Anticholinergic/selective 2-agonist combination", "indications": ["Chronic obstructive pulmonary disease (COPD)"], "quiz": "W7" },
+        { "generic": "Methylprednisolone", "brand": ["Medrol"], "class": "Adrenal corticosteroid", "indications": ["Conditions affecting the majority of organ systems (Inflammation)"], "quiz": "W7" },
+        { "generic": "Mometasone (Nasal)", "brand": ["Nasonex"], "class": "Intranasal corticosteroid", "indications": ["Allergic rhinitis"], "quiz": "W7" },
+        { "generic": "Tiotropium", "brand": ["Sprivia HandiHaler", "Spriva Respimat"], "class": "Anticholinergic bronchodilator", "indications": ["Asthma", "Chronic obstructive pulmonary disease (COPD)"], "quiz": "W7" },
+        { "generic": "Triamcinolone (Topical)", "brand": ["-"], "class": "Topical corticosteroid", "indications": ["Skin rash"], "quiz": "W7" },
+        { "generic": "Varenicline", "brand": ["Chantix"], "class": "Smoking cessation agent", "indications": ["Tobacco cessation"], "quiz": "W7" },
+        { "generic": "Carbidopa/levodopa", "brand": ["Sinemet"], "class": "Antiparkinson", "indications": ["Parkinson disease"], "quiz": "W8" },
+        { "generic": "Divalproex", "brand": ["Depakote"], "class": "Anticonvulsant", "indications": ["Seizures", "Manic bipolar disorder", "Migraine prophylaxis"], "quiz": "W8" },
+        { "generic": "Lamotrigine", "brand": ["Lamictal"], "class": "Anticonvulsant", "indications": ["Bipolar disorder", "Seizures"], "quiz": "W8" },
+        { "generic": "Levetiracetam", "brand": ["Keppra"], "class": "Anticonvulsant", "indications": ["Seizure"], "quiz": "W8" },
+        { "generic": "Topiramate", "brand": ["Topamax"], "class": "Anticonvulsant", "indications": ["Migraine", "Seizure"], "quiz": "W8" },
+        { "generic": "Pramipexole", "brand": ["Mirapex"], "class": "Dopamine agonist", "indications": ["Parkinson disease", "Restless leg syndrome"], "quiz": "W8" },
+        { "generic": "Ropinirole", "brand": ["Requip"], "class": "Dopamine agonist", "indications": ["Parkinson disease", "Restless legs syndrome"], "quiz": "W8" },
+        { "generic": "Phenobarbital", "brand": ["Luminal"], "class": "Long-acting barbiturate", "indications": ["Epilepsy", "Daytime sedation"], "quiz": "W8" },
+        { "generic": "Sumatriptan", "brand": ["Imitrex"], "class": "Antimigraine serotonic receptor agonist", "indications": ["Migraine", "Cluster headaches"], "quiz": "W8" },
+        { "generic": "Benzonatate", "brand": ["Tessalon Perles"], "class": "Antitussive", "indications": ["Cough"], "quiz": "W9" },
+        { "generic": "Bimatoprost", "brand": ["Lumigan, Latisse"], "class": "Prostaglandin, antiglaucoma agent, cosmetic agent for eyelash growth", "indications": ["Ocular hypertension, open-angle glaucoma", "Hypotrichosis of the eyelashes"], "quiz": "W9" },
+        { "generic": "Hydrocortisone Topical", "brand": ["Cortizone"], "class": "Topical corticosteroid", "indications": ["Skin disorders"], "quiz": "W9" },
+        { "generic": "Hydroxychloroquine", "brand": ["Plaquenil"], "class": "Aminoquinoline", "indications": ["Lupus", "Malaria", "Rheumatoid Arthritis"], "quiz": "W9" },
+        { "generic": "Latanoprost", "brand": ["Xalantan"], "class": "Prostaglandin, antiglaucoma agent", "indications": ["Ocular hypertension, open-angle glaucoma"], "quiz": "W9" },
+        { "generic": "Methotrexate", "brand": ["Trexall"], "class": "Antimetabolite", "indications": ["Psoriasis", "Rheumatoid arthritis", "Oncology"], "quiz": "W9" },
+        { "generic": "Ondansetron", "brand": ["Zofran"], "class": "Antiemetic", "indications": ["Nausea"], "quiz": "W9" },
+        { "generic": "Phenazopyridine", "brand": ["Pyridium"], "class": "Urinary tract analgesic", "indications": ["Dysuria"], "quiz": "W9" },
+        { "generic": "Promethazine", "brand": ["Phenergan"], "class": "Phenothiazine antihistamine", "indications": ["Motion sickness", "Nausea & vomiting", "Allergy"], "quiz": "W9" }
+    ];
+
+    // =====================================
+    // GLOBAL STATE
+    // =====================================
+    let drugs = [];
+    let allIndications = [];
+
+    // Settings
+    let quizMode = "gen_brand";   
+    let inputMethod = "buttons"; // "buttons" or "text"
+    let totalQuestions = 10;      
+    
+    // Runtime state
+    let currentIndex = 0;         
+    let score = 0;
+    let currentQuestion = null;
+    let quizActive = false;
+    let discoMode = false;
+    let examMode = false;
+    
+    // Smart Review State
+    let missedQueue = [];
+    let isSmartReviewActive = false;
+    let examAnswers = []; // For exam mode summary
+    
+    // Game State
+    let gameTime = 60;
+    let gameInterval = null;
+
+
+    // =====================================
+    // DATA LOADING & NORMALIZATION
+    // =====================================
+    function loadDrugs() {
+      // 1. Process Fall Drugs (Formatted as F1, F2 etc)
+      const processedFall = fallDrugs;
+
+      // 2. Process Winter Drugs (Already formatted as W1, W2 etc in source)
+      const processedWinter = winterDrugs;
+
+      // Combine
+      drugs = [...processedFall, ...processedWinter];
+
+      // Build deduplicated pool of all indications (global)
+      const set = new Set();
+      drugs.forEach(d => {
+        (d.indications || []).forEach(ind => set.add(ind));
+      });
+      allIndications = Array.from(set);
+
+      // Don't call updateScoreAndProgress here, let init handle it
+    }
+
+
+    // =====================================
+    // UI HELPERS
+    // =====================================
+
+    // Update label of the check/submit button based on mode
+    function updateCheckButtonLabel() {
+      const checkBtn = document.getElementById("check-answer");
+      if (!checkBtn) return;
+      
+      if (examMode) {
+          checkBtn.innerText = "Submit Answer";
+      } else {
+          // If we are in text input mode, label might vary
+          checkBtn.innerText = "Check Answer";
+      }
+    }
+
+    // Update text score, question counter, and progress bar
+    function updateScoreAndProgress() {
+      const progressEl = document.getElementById("progress");
+      const scoreEl = document.getElementById("score");
+      const fill = document.getElementById("progress-fill");
+
+      if (!quizActive) {
+        progressEl.innerText = "";
+        scoreEl.innerText = "";
+        if (fill) fill.style.width = "0%";
+        return;
+      }
+
+      // If smart review, show different text
+      let totalLabel = totalQuestions === 0 ? "∞" : totalQuestions;
+      if (isSmartReviewActive) {
+          totalLabel = missedQueue.length + currentIndex; // approximate
+          progressEl.innerText = `Smart Review: Question ${currentIndex + 1}`;
+      } else {
+          if (totalQuestions === 0) {
+            progressEl.innerText = `Question ${currentIndex}`;
+          } else {
+            progressEl.innerText = `Question ${currentIndex} of ${totalQuestions}`;
+          }
+      }
+
+      // Hide score in exam mode
+      scoreEl.innerText = examMode ? "" : `Score: ${score}`;
+
+      // Progress bar fill
+      if (fill) {
+        if (!isSmartReviewActive && totalQuestions !== 0) {
+          const pct = (currentIndex / totalQuestions) * 100;
+          fill.style.width = `${pct}%`;
+        } else if (isSmartReviewActive) {
+           fill.style.width = "100%"; // Just show full for smart review
+        } else {
+          fill.style.width = "0%";
+        }
+      }
+    }
+
+
+    // =====================================
+    // QUIZ FILTERING AND CONTROL
+    // =====================================
+
+    // Return only drugs whose quiz number is checked.
+    function getFilteredDrugs() {
+      // If smart review, return only the missed queue
+      if (isSmartReviewActive) return missedQueue;
+
+      const checks = document.querySelectorAll(".quiz-check:checked");
+      const selected = Array.from(checks).map(c => c.value);
+
+      if (selected.length === 0) return drugs;
+
+      return drugs.filter(d => {
+        if (!d.quiz) return false;
+        return selected.includes(d.quiz);
+      });
+    }
+    
+    function getActiveQuizTypes() {
+        const checks = document.querySelectorAll(".quiz-mode-check:checked");
+        const types = Array.from(checks).map(c => c.value);
+        return types.length > 0 ? types : ["gen_brand"];
+    }
+
+
+    function startQuiz() {
+      isSmartReviewActive = false;
+      missedQueue = []; // Reset missed queue on fresh start
+      document.getElementById("start-smart-review").style.display = "none";
+      
+      startSession();
+    }
+    
+    function startSmartReview() {
+        isSmartReviewActive = true;
+        // Don't reset missedQueue, we are using it
+        startSession();
+    }
+    
+    function startSession() {
+        quizActive = true;
+        currentIndex = 0;
+        score = 0;
+        selectedQuizTypes = getActiveQuizTypes(); // Ensure this is defined or handled
+        totalQuestions = parseInt(document.getElementById("num-questions").value);
+        
+        document.getElementById("game-hud").style.display = "none";
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("next-question").disabled = true;
+        document.getElementById("self-grade-buttons").style.display = "none";
+        
+        // Reset Flashcard
+        document.getElementById("flashcard-container").classList.remove("flashcard-flipped");
+
+        generateQuestion();
+        updateScoreAndProgress();
+    }
+    
+    function startGameSession() {
+        quizActive = true;
+        currentMode = "game";
+        score = 0;
+        gameTime = 60;
+        selectedQuizTypes = getActiveQuizTypes();
+        
+        // Force button input for game speed
+        inputMethod = "buttons"; 
+        
+        document.getElementById("game-hud").style.display = "flex";
+        document.getElementById("timer-display").innerText = gameTime;
+        document.getElementById("game-score").innerText = score;
+        
+        // Start Timer
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(() => {
+            gameTime--;
+            document.getElementById("timer-display").innerText = gameTime;
+            if (gameTime <= 0) endGame();
+        }, 1000);
+
+        generateQuestion();
+    }
+
+    function chooseInputMethod(method) {
+        inputMethod = method;
+        document.querySelectorAll(".input-btn").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.input === method);
+        });
+    }
+
+    // Main question generation.
+    function generateQuestion() {
+      // Standard End Check
+      if (currentMode !== "game" && !isSmartReviewActive && totalQuestions !== 0 && currentIndex >= totalQuestions) {
+        endQuiz();
+        return;
+      }
+      // If Smart Review, check if queue empty
+      if (isSmartReviewActive && missedQueue.length === 0) {
+          endQuiz();
+          return;
+      }
+
+      let q = null;
+      
+      const pool = getFilteredDrugs();
+        if (pool.length === 0) {
+            alert("No drugs selected!");
+            quizActive = false;
+            return;
+        }
+
+        // Pick random type from selected types
+        // Ensure selectedQuizTypes is populated. If undefined, default.
+        let types = (typeof selectedQuizTypes !== 'undefined' && selectedQuizTypes.length > 0) ? selectedQuizTypes : ["gen_brand"];
+        
+        const type = types[Math.floor(Math.random() * types.length)];
+        const drug = pool[Math.floor(Math.random() * pool.length)];
+        
+        // If Smart Review, remove this drug from queue immediately (we add back if wrong)
+        if (isSmartReviewActive) {
+            missedQueue = missedQueue.filter(d => d !== drug);
+        }
+
+        currentQuestion = buildQuestion(type, drug, pool); // Pass pool for distractors
+        
+        if (!currentQuestion) {
+            // Retry (simple recursion guard could be added, but minimal risk here)
+            // Or just fail gracefully
+            if(isSmartReviewActive && missedQueue.length === 0) { endQuiz(); return; }
+            generateQuestion(); 
+            return;
+        }
+
+      renderQuestion(currentQuestion); // Pass q explicitly or rely on currentQuestion global
+      updateScoreAndProgress();
+    }
+    
+    function buildQuestion(type, drug, pool) {
+        // Helper to get distractors
+        const getDistractors = (filterFn, mapFn) => {
+            // Use global drugs list for better distractors unless pool is strictly enforced
+            let source = drugs; 
+            let others = source.filter(d => d !== drug && filterFn(d)).map(mapFn);
+            shuffleArray(others);
+            return others.slice(0, 3);
+        };
+
+        let q = { drug, type, options: [], prompt: "", correctText: "" };
+
+        switch(type) {
+            case "gen_brand":
+                if (!drug.brand || !drug.brand.length) return null;
+                q.prompt = `Brand name for ${drug.generic}?`;
+                q.correctText = drug.brand[0];
+                q.options = [
+                    { text: drug.brand[0], correct: true },
+                    ...getDistractors(d => d.brand, d => d.brand[0]).map(t => ({ text: t, correct: false }))
+                ];
+                break;
+            case "brand_gen":
+                if (!drug.brand || !drug.brand.length) return null;
+                q.prompt = `Generic name for ${drug.brand[0]}?`;
+                q.correctText = drug.generic;
+                q.options = [
+                    { text: drug.generic, correct: true },
+                    ...getDistractors(d => true, d => d.generic).map(t => ({ text: t, correct: false }))
+                ];
+                break;
+            case "gen_ind": // Multi
+                if (!drug.indications || !drug.indications.length) return null;
+                q.prompt = `Indications for ${drug.generic}?`;
+                q.correctText = drug.indications.join(", ");
+                // Mixed logic for multi
+                let allInds = Array.from(new Set(drugs.flatMap(d => d.indications || [])));
+                let wrongInds = allInds.filter(i => !drug.indications.includes(i));
+                shuffleArray(wrongInds);
+                q.options = [
+                    ...drug.indications.map(i => ({ text: i, correct: true })),
+                    ...wrongInds.slice(0, 3).map(i => ({ text: i, correct: false }))
+                ];
+                q.multiSelect = true;
+                break;
+            case "brand_ind":
+                if (!drug.brand || !drug.brand.length || !drug.indications || !drug.indications.length) return null;
+                q.prompt = `Indications for ${drug.brand[0]}?`;
+                q.correctText = drug.indications.join(", ");
+                let allIndsBI = Array.from(new Set(drugs.flatMap(d => d.indications || [])));
+                let wrongIndsBI = allIndsBI.filter(i => !drug.indications.includes(i));
+                shuffleArray(wrongIndsBI);
+                q.options = [
+                    ...drug.indications.map(i => ({ text: i, correct: true })),
+                    ...wrongIndsBI.slice(0, 3).map(i => ({ text: i, correct: false }))
+                ];
+                q.multiSelect = true;
+                break;
+            case "ind_gen":
+                if (!drug.indications || !drug.indications.length) return null;
+                const targetIndIG = drug.indications[Math.floor(Math.random() * drug.indications.length)];
+                q.prompt = `Which generic treats: "${targetIndIG}"?`;
+                q.correctText = drug.generic;
+                q.options = [
+                    { text: drug.generic, correct: true },
+                    ...getDistractors(d => !d.indications || !d.indications.includes(targetIndIG), d => d.generic).map(t => ({ text: t, correct: false }))
+                ];
+                break;
+            case "ind_brand":
+                if (!drug.indications || !drug.indications.length || !drug.brand || !drug.brand.length) return null;
+                const targetIndIB = drug.indications[Math.floor(Math.random() * drug.indications.length)];
+                q.prompt = `Which brand treats: "${targetIndIB}"?`;
+                q.correctText = drug.brand[0];
+                q.options = [
+                    { text: drug.brand[0], correct: true },
+                    ...getDistractors(d => (!d.indications || !d.indications.includes(targetIndIB)) && d.brand && d.brand.length, d => d.brand[0]).map(t => ({ text: t, correct: false }))
+                ];
+                break;
+            default: // Fallback
+                return buildQuestion("gen_brand", drug, pool);
+        }
+        
+        shuffleArray(q.options);
+        return q;
+    }
+
+
+    // =====================================
+    // RENDERING
+    // =====================================
+    function renderQuestion(q) {
+        // Safe check
+        if(!q) return;
+        
+      const questionEl = document.getElementById("question-text");
+      const optionsEl = document.getElementById("options-container");
+      const textInputEl = document.getElementById("text-input-container");
+      const feedbackEl = document.getElementById("feedback");
+      const quizArea = document.getElementById("quiz-area");
+      const inputField = document.getElementById("answer-input");
+      const selfGradeBtns = document.getElementById("self-grade-buttons");
+
+      questionEl.innerText = q.prompt;
+      optionsEl.innerHTML = "";
+      feedbackEl.innerText = "";
+      inputField.value = "";
+      selfGradeBtns.style.display = "none";
+
+      // Toggle Input Method
+      // NOTE: Indications questions in "text" mode will default to self-grading flashcard style
+      // because auto-grading multi-select indications via text is bad UX.
+      
+      const isIndicationQuestion = q.type.includes("_ind"); // gen_ind, brand_ind
+      
+      // Mode specific override: Flashcards
+      if (currentMode === "flashcards") {
+            const fc = document.getElementById("flashcard-container");
+            fc.style.display = "block";
+            optionsEl.style.display = "none";
+            textInputEl.style.display = "none";
+            
+            fc.classList.remove("flashcard-flipped");
+            document.getElementById("fc-front-text").innerText = q.prompt;
+            document.getElementById("fc-back-text").innerText = q.correctText;
+            
+            // Flashcards navigation
+            document.getElementById("check-answer").style.display = "none";
+            document.getElementById("next-question").disabled = false;
+            document.getElementById("next-question").style.display = "inline-block";
+            return;
+      }
+      
+      // Hide flashcard if not in flashcard mode
+      document.getElementById("flashcard-container").style.display = "none";
+
+      if (inputMethod === "text" && currentMode !== "game") {
+          optionsEl.style.display = "none";
+          textInputEl.style.display = "flex";
+          inputField.focus();
+      } else {
+          optionsEl.style.display = "grid";
+          textInputEl.style.display = "none";
+          
+          q.options.forEach((opt, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = opt.text;
+            btn.dataset.index = idx;
+
+            btn.onclick = () => handleOptionClick(btn, q);
+            optionsEl.appendChild(btn);
+          });
+      }
+
+      document.getElementById("check-answer").disabled = false;
+      document.getElementById("next-question").disabled = true;
+      document.getElementById("check-answer").style.display = "inline-block";
+      
+      // Fade anim
+      quizArea.classList.remove("fade");
+      void quizArea.offsetWidth; 
+      quizArea.classList.add("fade");
+    }
+    
+    function handleOptionClick(btn, q) {
+        if (q.multiSelect) {
+            btn.classList.toggle("selected");
+        } else {
+            document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            // In game mode, auto-submit single choice
+            if (currentMode === "game") checkAnswer();
+        }
+    }
+
+
+    // =====================================
+    // ANSWER CHECKING
+    // =====================================
+    function checkAnswer() {
+      if (!currentQuestion) return;
+      const q = currentQuestion;
+      const feedbackEl = document.getElementById("feedback");
+      
+      if (currentMode === "flashcards") { nextQuestion(); return; }
+      
+      // Determine Correctness
+      let isCorrect = false;
+
+      // --- BUTTON MODE ---
+      if (inputMethod === "buttons" || currentMode === "game") {
+          const buttons = Array.from(document.querySelectorAll(".option-btn"));
+          const selectedIndices = buttons
+            .map((btn, idx) => (btn.classList.contains("selected") ? idx : null))
+            .filter(i => i !== null);
+
+          if (selectedIndices.length === 0 && !q.multiSelect) {
+            // Wait for selection in single select (game mode handles this inside click)
+            // But if user clicked Check Answer without selection:
+            feedbackEl.innerText = "Select at least one answer.";
+            return;
+          }
+
+          let allCorrect = true;
+          buttons.forEach((btn, idx) => {
+            const opt = q.options[idx];
+            const isSelected = selectedIndices.includes(idx);
+            if (opt.correct && !isSelected) allCorrect = false;
+            if (!opt.correct && isSelected) allCorrect = false;
+            
+            // Visuals
+            if (!examMode) {
+                if (opt.correct && isSelected) btn.classList.add("correct");
+                else if (!opt.correct && isSelected) btn.classList.add("incorrect");
+                else if (opt.correct) btn.classList.add("correct");
+            }
+          });
+          isCorrect = allCorrect;
+      } 
+      // --- TEXT INPUT MODE ---
+      else {
+          const inputField = document.getElementById("answer-input");
+          const userText = inputField.value.trim().toLowerCase();
+          
+          if (userText === "") {
+              feedbackEl.innerText = "Please type an answer.";
+              return;
+          }
+          
+          // Logic: 
+          // If simple single-answer (Gen->Brand or Brand->Gen), we can auto-grade mostly.
+          // If Indication involved, we trigger Self-Grade mode.
+          
+          const isComplex = q.type.includes("ind"); 
+          
+          if (!isComplex) {
+              // Simple check against correct option text
+              // We need to find the correct option text from options array
+              // Wait, q.options might be shuffled or distractors.
+              // Use q.correctText
+              const correctText = q.correctText.toLowerCase();
+              
+              // Simple check
+              if (userText === correctText) {
+                  isCorrect = true;
+                  feedbackEl.innerText = "Correct!";
+                  if(!examMode) feedbackEl.style.color = "green";
+              } else {
+                  isCorrect = false;
+                  feedbackEl.innerHTML = `Incorrect. The answer was <strong>${q.correctText}</strong>`;
+                  if(!examMode) feedbackEl.style.color = "red";
+              }
+          } else {
+              // Indication / Complex -> Self Grade
+              feedbackEl.innerHTML = `<div><strong>Correct Answer(s):</strong></div><div style="margin-bottom:10px; color:#555;">${q.correctText}</div><div>Did you get it right?</div>`;
+              document.getElementById("self-grade-buttons").style.display = "flex";
+              document.getElementById("check-answer").style.display = "none"; // Hide standard check btn
+              return; // Wait for user to click self-grade
+          }
+      }
+
+      processResult(isCorrect);
+    }
+    
+    // Self grading handlers
+    document.getElementById("btn-got-it").onclick = () => processResult(true);
+    document.getElementById("btn-missed-it").onclick = () => processResult(false);
+
+    function processResult(isCorrect) {
+        const feedback = document.getElementById("feedback");
+        document.getElementById("self-grade-buttons").style.display = "none";
+        document.getElementById("check-answer").disabled = true;
+        document.getElementById("next-question").disabled = false;
+        document.getElementById("next-question").style.display = "inline-block";
+        
+        // Disable inputs
+        document.querySelectorAll(".option-btn").forEach(b => b.onclick = null);
+
+        if (isCorrect) {
+            score++;
+            shootConfetti();
+            if (currentMode === "game") {
+                gameTime += 3;
+                showFloatingText("+3s", "time-added");
+                feedback.innerText = "Correct!";
+                setTimeout(nextQuestion, 800); // Auto advance in game
+            } else if (currentMode !== "exam") {
+                feedback.innerText = "Correct!";
+                feedback.style.color = "var(--correct)";
+            }
+        } else {
+            // Incorrect
+            // Check duplicates in missedQueue
+            if (!missedQueue.includes(currentQuestion.drug)) {
+                missedQueue.push(currentQuestion.drug);
+            }
+            
+            if (currentMode === "game") {
+                gameTime -= 5;
+                showFloatingText("-5s", "time-lost");
+                feedback.innerText = "Wrong!";
+                setTimeout(nextQuestion, 800);
+            } else if (currentMode !== "exam") {
+                feedback.innerText = "Incorrect.";
+                feedback.style.color = "var(--incorrect)";
+            }
+        }
+        updateScoreAndProgress();
+    }
+    
+    function showFloatingText(text, className) {
+        const el = document.createElement("div");
+        el.innerText = text;
+        el.className = className;
+        el.style.left = "50%";
+        el.style.top = "10px";
+        document.getElementById("game-hud").appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function nextQuestion() {
+      if (!quizActive) return;
+      // Increment index ONLY if not game mode (game mode is endless until time out, or handle differently?)
+      // Actually game mode should increment too for count, but totalQuestions isn't limit.
+      currentIndex++;
+      generateQuestion();
+    }
+
+
+    // =====================================
+    // END QUIZ AND SUMMARY
+    // =====================================
+    function endGame() {
+        clearInterval(gameInterval);
+        endQuiz();
+    }
+
+    function endQuiz() {
+      quizActive = false;
+
+      const feedbackEl = document.getElementById("feedback");
+      const optionsEl = document.getElementById("options-container");
+      const textInputEl = document.getElementById("text-input-container");
+      const flashcardEl = document.getElementById("flashcard-container");
+      
+      optionsEl.innerHTML = "";
+      textInputEl.style.display = "none";
+      flashcardEl.style.display = "none";
+      document.getElementById("question-text").innerText = "Session Complete";
+      
+      // Calculate totals
+      let total = 0;
+      if (currentMode === "game") {
+          total = currentIndex; // Questions attempted
+      } else if (isSmartReviewActive) {
+          total = currentIndex;
+      } else {
+          total = totalQuestions === 0 ? currentIndex : totalQuestions;
+      }
+      
+      const finalScore = score;
+      const percent = total > 0 ? (finalScore / total) * 100 : 0;
+
+      let phrase = "";
+      if (percent === 100) phrase = "Perfect score! You are a pharmaceutical menace.";
+      else if (percent >= 80) phrase = "You’re cooking. My mom would be impressed.";
+      else if (percent >= 50) phrase = "Solid attempt. The mitochondria are proud of your effort.";
+      else phrase = "…Well. At least you tried. Try again and ascend.";
+
+      let reviewBtnHTML = "";
+      if (missedQueue.length > 0) {
+          reviewBtnHTML = `<div style="margin-top:20px; font-size:16px;">You missed ${missedQueue.length} drugs. <br>Want to review them?</div>`;
+          document.getElementById("start-smart-review").style.display = "inline-block";
+          document.getElementById("start-smart-review").innerText = `Review ${missedQueue.length} Missed Items`;
+          
+          // Attach listener uniquely (remove old to avoid stack)
+          const oldBtn = document.getElementById("start-smart-review");
+          const newBtn = oldBtn.cloneNode(true);
+          oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+          newBtn.addEventListener("click", startSmartReview);
+          
+      } else {
+          document.getElementById("start-smart-review").style.display = "none";
+      }
+
+      feedbackEl.innerHTML = `
+        <div style="font-size: 20px; margin-bottom: 8px;">
+          ${currentMode === "game" ? "Time's Up!" : "Quiz Complete!"}
+        </div>
+        <div style="font-size: 18px; margin-bottom: 15px;">
+          Score: <strong>${finalScore} / ${total}</strong> (${Math.round(percent)}%)
+        </div>
+        <div style="color: #ff66a3;">${phrase}</div>
+        ${reviewBtnHTML}
+        <br>
+        <button onclick="location.reload()">Reset All</button>
+      `;
+
+      document.getElementById("check-answer").style.display = "none";
+      document.getElementById("next-question").style.display = "none";
+    }
+
+
+    // =====================================
+    // DOM READY & INIT
+    // =====================================
+    
+    function init() {
+        loadDrugs();
+        
+        setupListeners();
+        updateUIForMode();
+        
+        // Initial state
+        document.getElementById("game-hud").style.display = "none";
+    }
+
+    function setupListeners() {
+        // Mode Buttons
+        document.querySelectorAll(".mode-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active-mode"));
+                btn.classList.add("active-mode");
+                currentMode = btn.dataset.mode;
+                updateUIForMode();
+            });
+        });
+
+        // Accessibility Panel
+        document.getElementById("btn-a11y-toggle").addEventListener("click", () => {
+            document.getElementById("a11y-panel").classList.toggle("open");
+        });
+
+        // Theme
+        document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+        });
+
+        // Text Size
+        const lgTextBtn = document.getElementById("btn-large-text");
+        lgTextBtn.addEventListener("click", () => {
+            document.body.classList.toggle("large-text");
+            lgTextBtn.innerText = document.body.classList.contains("large-text") ? "Large Text: ON" : "Large Text: OFF";
+        });
+
+        // Reduce Motion
+        const motionBtn = document.getElementById("btn-reduce-motion");
+        motionBtn.addEventListener("click", () => {
+            document.body.classList.toggle("reduce-motion");
+            motionBtn.innerText = document.body.classList.contains("reduce-motion") ? "Reduce Motion: ON" : "Reduce Motion: OFF";
+            // Kill disco if active
+            if(discoMode) toggleDisco();
+        });
+        
+        // High Contrast
+        const contrastBtn = document.getElementById("btn-high-contrast");
+        contrastBtn.addEventListener("click", () => {
+            document.body.classList.toggle("high-contrast");
+            contrastBtn.innerText = document.body.classList.contains("high-contrast") ? "High Contrast: ON" : "High Contrast: OFF";
+        });
+
+        // Input Method
+        document.querySelectorAll(".input-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                inputMethod = btn.dataset.input;
+                document.querySelectorAll(".input-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+            });
+        });
+
+        // Start Button
+        document.getElementById("start-quiz").addEventListener("click", () => {
+            if (currentMode === "game") {
+                document.getElementById("instructions-overlay").style.display = "flex";
+            } else {
+                startSession();
+            }
+        });
+
+        // Game Overlay
+        document.getElementById("btn-start-game").addEventListener("click", () => {
+            document.getElementById("instructions-overlay").style.display = "none";
+            startGameSession();
+        });
+        document.getElementById("btn-cancel-game").addEventListener("click", () => {
+            document.getElementById("instructions-overlay").style.display = "none";
+        });
+
+        // Navigation
+        document.getElementById("check-answer").addEventListener("click", checkAnswer);
+        document.getElementById("next-question").addEventListener("click", nextQuestion);
+        
+        // Flashcard Click
+        document.getElementById("flashcard-container").addEventListener("click", function() {
+            this.classList.toggle("flashcard-flipped");
+        });
+
+        // Disco
+        document.getElementById("disco-ball").addEventListener("click", toggleDisco);
+        
+        // Enter Key
+        document.getElementById("answer-input").addEventListener("keypress", (e) => {
+            if (e.key === "Enter" && !document.getElementById("check-answer").disabled) checkAnswer();
+        });
+        
+        // Select/Clear All
+        document.getElementById("select-all-quizzes").addEventListener("click", () => {
+            document.querySelectorAll(".quiz-check").forEach(b => (b.checked = true));
+        });
+
+        document.getElementById("clear-all-quizzes").addEventListener("click", () => {
+            document.querySelectorAll(".quiz-check").forEach(b => (b.checked = false));
+        });
+    }
+
+    function toggleDisco() {
+        if(document.body.classList.contains("reduce-motion")) return;
+        discoMode = !discoMode;
+        if(discoMode) {
+            document.body.classList.add("disco-bg");
+            document.getElementById("disco-ball").classList.add("disco-spin");
+            launchDiscoConfetti();
+        } else {
+            document.body.classList.remove("disco-bg");
+            document.getElementById("disco-ball").classList.remove("disco-spin");
+        }
+    }
+
+    function updateUIForMode() {
+        // Show/Hide relevant controls based on mode
+        const quizTypeRow = document.getElementById("quiz-types-row");
+        const inputGroup = document.getElementById("input-method-group");
+        const lengthGroup = document.getElementById("length-group");
+        const startBtn = document.getElementById("start-quiz");
+
+        // Defaults
+        quizTypeRow.style.display = "flex";
+        inputGroup.style.display = "flex";
+        lengthGroup.style.display = "flex";
+        startBtn.innerText = "START SESSION";
+
+        if (currentMode === "flashcards") {
+            inputGroup.style.display = "none";
+            startBtn.innerText = "START FLASHCARDS";
+        } else if (currentMode === "game") {
+            inputGroup.style.display = "none"; // Always buttons for speed
+            lengthGroup.style.display = "none"; // Time based
+            startBtn.innerText = "OPEN GAME LOBBY";
+        } else if (currentMode === "exam") {
+            startBtn.innerText = "START EXAM";
+        }
+    }
+
+    // Init
+    init();
+
+  </script>
+</body>
+</html>
