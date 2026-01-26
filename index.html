@@ -21,6 +21,9 @@
       --correct-border: #6ecf6e;
       --incorrect: #ffbaba;
       --incorrect-border: #e57373;
+      --partial: #fff3cd;
+      --partial-border: #ffecb5;
+      --partial-text: #856404;
       --progress-bg: #eee;
       --progress-fill: linear-gradient(90deg, #ff66a3, #ff9472);
       --font-size-base: 16px;
@@ -42,6 +45,9 @@
       --correct-border: #0f6d3e;
       --incorrect: #a33a3a;
       --incorrect-border: #842b2b;
+      --partial: #4d3e12;
+      --partial-border: #5e4b16;
+      --partial-text: #ffdd75;
       --progress-bg: #444;
     }
     
@@ -51,6 +57,7 @@
         --button-active-bg: #ffff00; --button-active-text: #000000;
         --correct: #00ff00; --correct-border: #ffffff;
         --incorrect: #ff0000; --incorrect-border: #ffffff;
+        --partial: #ffff00; --partial-border: #ffffff; --partial-text: #000;
     }
     
     body.large-text { --font-size-base: 22px; --font-size-lg: 28px; }
@@ -88,6 +95,9 @@
     button.active { background: var(--button-active-bg); color: var(--button-active-text); font-weight: bold; border-color: var(--button-active-bg); }
 
     .mode-btn.active-mode { background: #ff66a3; color: white; border-color: #ff3385; box-shadow: 0 0 8px rgba(255,102,163,0.4); }
+    /* Checkmark for active mode buttons */
+    .mode-btn.active-mode::after { content: " ✓"; font-weight: bold; }
+    
     .mode-btn[data-mode="chaos"] {
         background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff); background-size: 200% 200%;
         animation: gradientShift 3s ease infinite; color: white; border: none; font-weight: bold;
@@ -101,16 +111,20 @@
       min-height: 300px; display: flex; flex-direction: column; justify-content: center;
       position: relative; overflow: hidden;
     }
-    #question-text { font-size: var(--font-size-lg); margin-bottom: 20px; font-weight: bold; z-index: 2; }
+    #question-text { font-size: var(--font-size-lg); margin-bottom: 20px; font-weight: bold; z-index: 2; line-height: 1.4; }
     
     #options-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; z-index: 2; }
     @media (max-width: 600px) { #options-container { grid-template-columns: 1fr; } }
     
-    .option-btn { padding: 16px; width: 100%; text-align: center; position: relative; }
-    .option-btn.selected { border-color: #6666ff; box-shadow: 0 0 4px rgba(0,0,0,0.2); background-color: #e6e6ff; }
+    .option-btn { padding: 16px; width: 100%; text-align: center; position: relative; border-width: 1px; border-style: solid; }
+    /* UPDATED: Selected state now has a thicker border to indicate user choice */
+    .option-btn.selected { border-color: #6666ff; box-shadow: 0 0 4px rgba(0,0,0,0.2); background-color: #e6e6ff; border-width: 3px !important; font-weight: bold; }
     .dark-mode .option-btn.selected { background-color: #4a4a6a; }
+    
+    /* UPDATED: Correct/Incorrect states */
     .option-btn.correct { background: var(--correct) !important; border-color: var(--correct-border) !important; color: #000; }
     .option-btn.incorrect { background: var(--incorrect) !important; border-color: var(--incorrect-border) !important; color: #000; }
+    .option-btn.partial { background: var(--partial) !important; border-color: var(--partial-border) !important; color: var(--partial-text); }
 
     #text-input-container { display: none; flex-direction: column; align-items: center; gap: 12px; width: 100%; z-index: 2; }
     input[type="text"] { width: 100%; max-width: 400px; text-align: center; }
@@ -126,7 +140,7 @@
     }
     .flashcard-front { background: var(--button-bg); }
     .flashcard-back { background: var(--card-bg); transform: rotateY(180deg); }
-    .fc-content { font-size: var(--font-size-lg); font-weight: bold; }
+    .fc-content { font-size: var(--font-size-lg); font-weight: bold; white-space: pre-wrap; line-height: 1.4; }
 
     /* PILLS */
     .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -135,9 +149,11 @@
         padding: 6px 12px; border-radius: 20px; border: 1px solid var(--button-border);
         background: var(--card-bg); cursor: pointer; font-size: 0.9em; transition: all 0.2s;
     }
-    .pill-checkbox:checked + .pill-label { background: var(--button-active-bg); color: var(--button-active-text); border-color: var(--button-active-bg); }
+    .pill-checkbox:checked + .pill-label { background: var(--button-active-bg); color: var(--button-active-text); border-color: var(--button-active-bg); font-weight: bold; }
+    /* Checkmark for active pills */
+    .pill-checkbox:checked + .pill-label::before { content: "✓ "; }
 
-    #feedback { min-height: 24px; margin: 15px 0; font-weight: bold; font-size: var(--font-size-lg); z-index: 2; }
+    #feedback { min-height: 24px; margin: 15px 0; font-weight: bold; font-size: var(--font-size-lg); z-index: 2; line-height: 1.5; }
     #self-grade-buttons { display: none; gap: 10px; margin-top: 15px; justify-content: center; z-index: 2; }
     #btn-got-it { background: #b6ffb6; border-color: #6ecf6e; color: #000; }
     #btn-missed-it { background: #ffbaba; border-color: #e57373; color: #000; }
@@ -166,14 +182,49 @@
     .dark-mode .disco-bg { animation: discoFadeDark 8s infinite alternate; }
     @keyframes discoFadeDark { 0% { background-color: #4a1a2c; } 50% { background-color: #1a3a4a; } 100% { background-color: #4a3a1a; } }
 
-    /* Chaos Animations */
-    @keyframes chaos-float { 0% { transform: translate(0,0) rotate(0deg); } 33% { transform: translate(10px,-10px) rotate(2deg); } 66% { transform: translate(-10px,10px) rotate(-2deg); } 100% { transform: translate(0,0); } }
-    @keyframes chaos-shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-    @keyframes chaos-blur { 0% { filter: blur(0); } 50% { filter: blur(1.5px); } 100% { filter: blur(0); } }
+    /* EXTREME CHAOS MODE STYLES */
+    body.chaos-active { animation: bg-rainbow 5s linear infinite; }
+    @keyframes bg-rainbow {
+        0% { background-color: #ffe0f0; } 20% { background-color: #e0f7ff; }
+        40% { background-color: #e0ffe0; } 60% { background-color: #fff0e0; }
+        80% { background-color: #f0e0ff; } 100% { background-color: #ffe0f0; }
+    }
+    .dark-mode.chaos-active { animation: bg-rainbow-dark 5s linear infinite; }
+    @keyframes bg-rainbow-dark {
+        0% { background-color: #4a1a2c; } 20% { background-color: #1a3a4a; }
+        40% { background-color: #1a4a1a; } 60% { background-color: #4a3a1a; }
+        80% { background-color: #3a1a4a; } 100% { background-color: #4a1a2c; }
+    }
+
+    @keyframes chaos-float { 
+        0% { transform: translate(0,0) rotate(0deg); } 
+        25% { transform: translate(30px,-30px) rotate(10deg); } 
+        50% { transform: translate(-20px,20px) rotate(-5deg); } 
+        75% { transform: translate(15px,-15px) rotate(5deg); } 
+        100% { transform: translate(0,0) rotate(0deg); } 
+    }
+    @keyframes chaos-shake { 
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
+    @keyframes chaos-pulse { 0% { transform: scale(0.9); } 50% { transform: scale(1.1); } 100% { transform: scale(0.9); } }
+    @keyframes chaos-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes chaos-flash { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0.3; } }
     
     .effect-float { animation: chaos-float 3s ease-in-out infinite; }
-    .effect-shake { animation: chaos-shake 0.4s linear infinite; }
-    .effect-blur { animation: chaos-blur 2s ease-in-out infinite; }
+    .effect-shake { animation: chaos-shake 0.3s linear infinite; }
+    .effect-pulse { animation: chaos-pulse 0.5s ease-in-out infinite; }
+    .effect-rotate { animation: chaos-rotate 8s linear infinite; }
+    .effect-flash { animation: chaos-flash 0.5s steps(5, start) infinite; }
 
     /* OVERLAYS */
     #instructions-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; color: white; flex-direction: column; }
@@ -199,7 +250,7 @@
   </div>
 
   <h1>Top 200 Drugs Quiz</h1>
-  <h2 class="subtitle">Built for no apparent reason</h2>
+  <h2 class="subtitle">Study Tool for Pharmacy Students</h2>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 
   <!-- CONTROLS -->
@@ -306,7 +357,7 @@
     <div id="flashcard-container">
         <div id="flashcard-inner">
             <div class="flashcard-face flashcard-front">
-                <div class="fc-label">Question</div><div class="fc-content" id="fc-front-text">Front</div><div style="margin-top:20px; font-size:0.8em; color:#666;">(Click to flip)</div>
+                <div class="fc-label">Question</div><div class="fc-content" id="fc-front-text">Front</div><div style="margin-top:20px; font-size:0.8em; color:#666;">(Press Space to flip)</div>
             </div>
             <div class="flashcard-face flashcard-back">
                 <div class="fc-label">Answer</div><div class="fc-content" id="fc-back-text">Back</div>
@@ -328,6 +379,49 @@
 
   <script>
     // --- UTILS ---
+    function cleanString(str) {
+        // Lowercase, remove all non-alphanumeric chars (including spaces for strict comparison of content)
+        // This handles "Pro-Air", "Pro Air", "ProAir" all becoming "proair"
+        return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function getLevenshteinDistance(a, b) {
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    function isFuzzyMatch(user, target) {
+        const u = cleanString(user);
+        const t = cleanString(target);
+        
+        if (u === t) return true;
+        
+        // If the user input is very short, exact match (cleaned) is required to prevent false positives
+        if (u.length < 3) return false;
+
+        const dist = getLevenshteinDistance(u, t);
+        // Allow variance based on length
+        const maxLen = Math.max(u.length, t.length);
+        const allowed = maxLen > 6 ? 2 : 1; 
+        
+        return dist <= allowed;
+    }
+
     function shuffleArray(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -590,8 +684,10 @@
                 
                 // Toggle chaos class
                 if (currentMode === "chaos") {
+                    document.body.classList.add("chaos-active");
                     document.getElementById("quiz-area").classList.add("chaos-mode-active");
                 } else {
+                    document.body.classList.remove("chaos-active");
                     document.getElementById("quiz-area").classList.remove("chaos-mode-active");
                 }
                 
@@ -641,7 +737,8 @@
                     desc.innerText = "Survive the storm!";
                     list.innerHTML = `
                         <li>⏱️ <strong>60 Seconds</strong></li>
-                        <li>🌪️ Questions <strong>float, spin, shake</strong></li>
+                        <li>🌪️ Questions <strong>float, spin, shake & flash</strong></li>
+                        <li>🎨 <strong>Epilepsy Warning: Flashing colors</strong></li>
                         <li>✅ Correct: <strong>+4s</strong></li>
                         <li>❌ Wrong: <strong>-5s</strong></li>
                     `;
@@ -688,6 +785,18 @@
 
         document.getElementById("clear-all-quizzes").addEventListener("click", () => {
             document.querySelectorAll(".quiz-check").forEach(b => (b.checked = false));
+        });
+
+        // Flashcard keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (currentMode === 'flashcards' && quizActive) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    document.getElementById("flashcard-container").classList.toggle("flashcard-flipped");
+                } else if (e.code === 'ArrowRight') {
+                    if (!document.getElementById("next-question").disabled) nextQuestion();
+                } 
+            }
         });
     }
 
@@ -900,54 +1009,125 @@
     }
     
     function buildQuestion(type, drug) {
-        const getDistractors = (filterFn, mapFn) => {
+        // Updated distractor logic to handle flat mapping and counts
+        const getDistractors = (filterFn, mapFn, count = 3) => {
             let others = drugs.filter(d => d !== drug && filterFn(d)).map(mapFn);
+            others = others.flat(); // Ensure we don't have nested arrays
             others = [...new Set(others)];
             shuffleArray(others);
-            return others.slice(0, 3);
+            return others.slice(0, count);
         };
 
-        let q = { drug, type, options: [], prompt: "", correctText: "" };
+        // All questions now support multi-select logic by default
+        let q = { drug, type, options: [], prompt: "", correctText: "", multiSelect: true };
+
+        const joinList = (list) => list.join("\n• ");
 
         switch(type) {
             case "gen_brand":
-                q.prompt = `Brand name for ${drug.generic}?`; q.correctText = drug.brand[0];
-                q.options = [{ text: drug.brand[0], correct: true }, ...getDistractors(d => d.brand, d => d.brand[0]).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Brand name(s) for ${drug.generic}?`; 
+                q.correctText = drug.brand.join("\n• "); 
+                // Show ALL brands as correct options
+                q.options = drug.brand.map(b => ({ text: b, correct: true }));
+                // Fill with distractors to reach at least 4 total options
+                const fillCountGB = Math.max(4 - q.options.length, 1);
+                q.options.push(...getDistractors(d => d.brand, d => d.brand, fillCountGB).map(t => ({ text: t, correct: false })));
+                break;
             case "brand_gen":
-                q.prompt = `Generic name for ${drug.brand[0]}?`; q.correctText = drug.generic;
-                q.options = [{ text: drug.generic, correct: true }, ...getDistractors(d => true, d => d.generic).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Generic name for ${drug.brand[0]}?`; 
+                q.correctText = drug.generic;
+                q.options = [{ text: drug.generic, correct: true }];
+                q.options.push(...getDistractors(d => true, d => d.generic, 3).map(t => ({ text: t, correct: false })));
+                break;
             case "gen_ind":
-                q.prompt = `Indications for ${drug.generic}?`; q.correctText = drug.indications.join(", ");
+                q.prompt = `Indications for ${drug.generic}?`; 
+                q.correctText = "• " + joinList(drug.indications);
+                q.options = drug.indications.map(i => ({ text: i, correct: true }));
+                const fillCountGI = Math.max(4 - q.options.length, 1);
                 let wrongInds = Array.from(new Set(drugs.flatMap(d => d.indications || []))).filter(i => !drug.indications.includes(i));
                 shuffleArray(wrongInds);
-                q.options = [...drug.indications.map(i => ({ text: i, correct: true })), ...wrongInds.slice(0, 3).map(i => ({ text: i, correct: false }))];
-                q.multiSelect = true; break;
+                q.options.push(...wrongInds.slice(0, fillCountGI).map(i => ({ text: i, correct: false })));
+                break;
             case "brand_ind":
-                q.prompt = `Indications for ${drug.brand[0]}?`; q.correctText = drug.indications.join(", ");
+                q.prompt = `Indications for ${drug.brand[0]}?`; 
+                q.correctText = "• " + joinList(drug.indications);
+                q.options = drug.indications.map(i => ({ text: i, correct: true }));
+                const fillCountBI = Math.max(4 - q.options.length, 1);
                 let wrongIndsBI = Array.from(new Set(drugs.flatMap(d => d.indications || []))).filter(i => !drug.indications.includes(i));
                 shuffleArray(wrongIndsBI);
-                q.options = [...drug.indications.map(i => ({ text: i, correct: true })), ...wrongIndsBI.slice(0, 3).map(i => ({ text: i, correct: false }))];
-                q.multiSelect = true; break;
+                q.options.push(...wrongIndsBI.slice(0, fillCountBI).map(i => ({ text: i, correct: false })));
+                break;
             case "ind_gen":
                 const tIG = drug.indications[Math.floor(Math.random() * drug.indications.length)];
-                q.prompt = `Which generic treats: "${tIG}"?`; q.correctText = drug.generic;
-                q.options = [{ text: drug.generic, correct: true }, ...getDistractors(d => !d.indications || !d.indications.includes(tIG), d => d.generic).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Which generic treats: "${tIG}"?`; 
+                
+                // Find ALL generics that treat this indication
+                const correctGenerics = drugs.filter(d => d.indications && d.indications.includes(tIG)).map(d => d.generic);
+                // Present up to 3 correct options (so it's not overwhelming)
+                shuffleArray(correctGenerics);
+                const chosenCorrect = correctGenerics.slice(0, 3);
+                
+                q.correctText = joinList(correctGenerics);
+                q.options = chosenCorrect.map(g => ({ text: g, correct: true }));
+                
+                const fillCountIG = Math.max(4 - q.options.length, 1);
+                q.options.push(...getDistractors(d => !d.indications || !d.indications.includes(tIG), d => d.generic, fillCountIG).map(t => ({ text: t, correct: false }))); 
+                break;
             case "ind_brand":
                 const tIB = drug.indications[Math.floor(Math.random() * drug.indications.length)];
-                q.prompt = `Which brand treats: "${tIB}"?`; q.correctText = drug.brand[0];
-                q.options = [{ text: drug.brand[0], correct: true }, ...getDistractors(d => (!d.indications || !d.indications.includes(tIB)) && d.brand, d => d.brand[0]).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Which brand treats: "${tIB}"?`; 
+                
+                // Find ALL brands that treat this indication
+                const correctBrandsList = drugs.filter(d => d.indications && d.indications.includes(tIB)).flatMap(d => d.brand);
+                shuffleArray(correctBrandsList);
+                const chosenBrands = correctBrandsList.slice(0, 3);
+
+                q.correctText = joinList(correctBrandsList);
+                q.options = chosenBrands.map(b => ({ text: b, correct: true }));
+                
+                const fillCountIB = Math.max(4 - q.options.length, 1);
+                q.options.push(...getDistractors(d => (!d.indications || !d.indications.includes(tIB)) && d.brand, d => d.brand, fillCountIB).map(t => ({ text: t, correct: false }))); 
+                break;
             case "gen_class":
-                q.prompt = `Therapeutic Class for ${drug.generic}?`; q.correctText = drug.class;
-                q.options = [{ text: drug.class, correct: true }, ...getDistractors(d => d.class && d.class !== drug.class, d => d.class).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Therapeutic Class for ${drug.generic}?`; 
+                q.correctText = drug.class;
+                q.options = [{ text: drug.class, correct: true }];
+                q.options.push(...getDistractors(d => d.class && d.class !== drug.class, d => d.class, 3).map(t => ({ text: t, correct: false }))); 
+                break;
             case "brand_class":
-                q.prompt = `Therapeutic Class for ${drug.brand[0]}?`; q.correctText = drug.class;
-                q.options = [{ text: drug.class, correct: true }, ...getDistractors(d => d.class && d.class !== drug.class, d => d.class).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Therapeutic Class for ${drug.brand[0]}?`; 
+                q.correctText = drug.class;
+                q.options = [{ text: drug.class, correct: true }];
+                q.options.push(...getDistractors(d => d.class && d.class !== drug.class, d => d.class, 3).map(t => ({ text: t, correct: false }))); 
+                break;
             case "class_gen":
-                q.prompt = `Which generic belongs to: ${drug.class}?`; q.correctText = drug.generic;
-                q.options = [{ text: drug.generic, correct: true }, ...getDistractors(d => d.class !== drug.class, d => d.generic).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Which generic belongs to: ${drug.class}?`; 
+                
+                // Find ALL generics in this class
+                const correctClassGenerics = drugs.filter(d => d.class === drug.class).map(d => d.generic);
+                shuffleArray(correctClassGenerics);
+                const chosenClassGen = correctClassGenerics.slice(0, 3);
+
+                q.correctText = joinList(correctClassGenerics);
+                q.options = chosenClassGen.map(g => ({ text: g, correct: true }));
+                
+                const fillCountCG = Math.max(4 - q.options.length, 1);
+                q.options.push(...getDistractors(d => d.class !== drug.class, d => d.generic, fillCountCG).map(t => ({ text: t, correct: false }))); 
+                break;
             case "class_brand":
-                q.prompt = `Which brand belongs to: ${drug.class}?`; q.correctText = drug.brand[0];
-                q.options = [{ text: drug.brand[0], correct: true }, ...getDistractors(d => d.class !== drug.class && d.brand, d => d.brand[0]).map(t => ({ text: t, correct: false }))]; break;
+                q.prompt = `Which brand belongs to: ${drug.class}?`; 
+                
+                // Find ALL brands in this class
+                const correctClassBrands = drugs.filter(d => d.class === drug.class).flatMap(d => d.brand);
+                shuffleArray(correctClassBrands);
+                const chosenClassBrand = correctClassBrands.slice(0, 3);
+
+                q.correctText = joinList(correctClassBrands);
+                q.options = chosenClassBrand.map(b => ({ text: b, correct: true }));
+                
+                const fillCountCB = Math.max(4 - q.options.length, 1);
+                q.options.push(...getDistractors(d => d.class !== drug.class && d.brand, d => d.brand, fillCountCB).map(t => ({ text: t, correct: false }))); 
+                break;
         }
         
         shuffleArray(q.options);
@@ -964,17 +1144,40 @@
       const inputField = document.getElementById("answer-input");
       const selfGradeBtns = document.getElementById("self-grade-buttons");
 
-      questionEl.innerText = q.prompt;
+      // Determine prompt helper text
+      let promptText = q.prompt;
+      if (currentMode !== 'flashcards') {
+          if (inputMethod === 'buttons') {
+             const correctCount = q.options.filter(o => o.correct).length;
+             if (correctCount > 1) {
+                 promptText += '<br><span style="font-size:0.85em; font-weight:normal; color:#666;">(Select all that apply)</span>';
+             } else {
+                 promptText += '<br><span style="font-size:0.85em; font-weight:normal; color:#666;">(Select all that apply)</span>';
+             }
+          } else if (inputMethod === 'text' && (q.type === 'gen_brand' || q.type === 'ind_brand')) {
+             promptText += '<br><span style="font-size:0.85em; font-weight:normal; color:#666;">(Type any one)</span>';
+          }
+      }
+      questionEl.innerHTML = promptText;
+
       optionsEl.innerHTML = "";
       feedbackEl.innerText = "";
       inputField.value = "";
       selfGradeBtns.style.display = "none";
+      
+      const checkBtn = document.getElementById("check-answer");
+      if (currentMode === 'exam') {
+          checkBtn.innerText = "Submit Answer";
+      } else {
+          checkBtn.innerText = "Check";
+      }
 
       if (currentMode === "chaos") {
-          const effects = ["effect-float", "effect-spin", "effect-shake", "effect-blur"]; 
-          const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-          optionsEl.className = ""; questionEl.className = "";
-          if (Math.random() > 0.5) optionsEl.classList.add(randomEffect); else questionEl.classList.add(randomEffect);
+          const effects = ["effect-float", "effect-shake", "effect-pulse", "effect-rotate", "effect-flash"];
+          const qEffect = effects[Math.floor(Math.random() * effects.length)];
+          questionEl.className = qEffect;
+          const cEffect = effects[Math.floor(Math.random() * effects.length)];
+          optionsEl.className = cEffect; 
       } else {
           optionsEl.className = ""; questionEl.className = "";
       }
@@ -1002,17 +1205,18 @@
             btn.className = "option-btn";
             btn.innerText = opt.text;
             if (currentMode === "chaos") {
-                btn.style.transform = `rotate(${Math.random() * 10 - 5}deg) translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px)`;
+                const rot = Math.random() * 60 - 30; 
+                const tx = Math.random() * 100 - 50; 
+                const ty = Math.random() * 100 - 50;
+                const scale = 0.8 + Math.random() * 0.4;
+                btn.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${scale})`;
+                btn.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
             } else {
                 btn.style.transform = "none";
+                btn.style.filter = "none";
             }
             btn.onclick = () => {
-                if (q.multiSelect) btn.classList.toggle("selected");
-                else {
-                    document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    if (currentMode === "game" || currentMode === "chaos") checkAnswer();
-                }
+                btn.classList.toggle("selected");
             };
             optionsEl.appendChild(btn);
           });
@@ -1031,47 +1235,92 @@
       if (currentMode === "flashcards") { nextQuestion(); return; }
       
       let isCorrect = false;
+      let isPartial = false;
       const feedback = document.getElementById("feedback");
 
       if (inputMethod === "buttons" || currentMode === "game" || currentMode === "chaos") {
           const selected = Array.from(document.querySelectorAll(".option-btn.selected"));
-          if (selected.length === 0 && !q.multiSelect) { feedback.innerText = "Select an answer."; return; }
+          if (selected.length === 0) { feedback.innerText = "Select at least one answer."; return; }
 
-          let allCorrect = true;
+          let correctSelected = 0;
+          let incorrectSelected = 0;
+          let totalCorrect = 0;
+
+          q.options.forEach(opt => { if(opt.correct) totalCorrect++; });
+
           document.querySelectorAll(".option-btn").forEach((btn, idx) => {
             const opt = q.options[idx];
             const isSelected = btn.classList.contains("selected");
-            if ((opt.correct && !isSelected) || (!opt.correct && isSelected)) allCorrect = false;
+            
+            if (isSelected) {
+                if (opt.correct) correctSelected++; else incorrectSelected++;
+            }
+            
             if (currentMode !== 'exam') {
                 if (opt.correct) btn.classList.add("correct");
                 else if (isSelected) btn.classList.add("incorrect");
             }
           });
-          isCorrect = allCorrect;
+
+          if (incorrectSelected === 0 && correctSelected === totalCorrect) {
+              isCorrect = true;
+          } else if (correctSelected > 0) {
+              isPartial = true;
+          }
       } else {
-          const val = document.getElementById("answer-input").value.trim().toLowerCase();
-          if (!val) { feedback.innerText = "Type an answer."; return; }
+          // Text Input Logic 
+          const rawVal = document.getElementById("answer-input").value;
+          if (!rawVal.trim()) { feedback.innerText = "Type an answer."; return; }
+          
+          let isMatch = false;
+          
+          // Gather all acceptable answers
+          const acceptableAnswers = [];
+          
+          // 1. Properties of the current drug card
+          if (q.drug.generic) acceptableAnswers.push(q.drug.generic);
+          if (q.drug.brand && Array.isArray(q.drug.brand)) acceptableAnswers.push(...q.drug.brand);
+          if (q.drug.indications && Array.isArray(q.drug.indications)) acceptableAnswers.push(...q.drug.indications);
+          
+          // 2. Options marked correct (handles cases where multiple drugs are valid for Indication/Class questions)
+          if (q.options) {
+              q.options.forEach(opt => {
+                  if (opt.correct) acceptableAnswers.push(opt.text);
+              });
+          }
+
+          // Check if user input matches ANY acceptable answer using fuzzy logic
+          if (acceptableAnswers.some(ans => isFuzzyMatch(rawVal, ans))) {
+              isMatch = true;
+          }
+
           const isComplex = q.type.includes("ind") || q.type.includes("class"); 
+          
           if (!isComplex) {
-              if (val === q.correctText.toLowerCase()) {
-                  isCorrect = true; feedback.innerText = "Correct!"; feedback.style.color = "green";
+              if (isMatch) {
+                  isCorrect = true; feedback.innerHTML = '<span style="color:green">✅ <strong>Correct!</strong></span>';
               } else {
-                  isCorrect = false; feedback.innerHTML = `Incorrect. Answer: ${q.correctText}`; feedback.style.color = "red";
+                  isCorrect = false; 
+                  let ansText = q.correctText;
+                  if (q.type === 'gen_brand' && q.drug.brand.length > 1) {
+                      ansText = q.drug.brand.join(", ");
+                  }
+                  feedback.innerHTML = `<span style="color:var(--incorrect-border)">❌ <strong>Incorrect.</strong></span><br>Correct Answer: <strong>${ansText}</strong>`;
               }
           } else {
-              feedback.innerHTML = `Correct: ${q.correctText}<br>Did you get it?`;
+              feedback.innerHTML = `Correct: ${q.correctText.replace(/\n/g, "<br>")}<br>Did you get it?`;
               document.getElementById("self-grade-buttons").style.display = "flex";
               document.getElementById("check-answer").style.display = "none";
               return; 
           }
       }
-      processResult(isCorrect);
+      processResult(isCorrect, isPartial);
     }
     
-    document.getElementById("btn-got-it").onclick = () => processResult(true);
-    document.getElementById("btn-missed-it").onclick = () => processResult(false);
+    document.getElementById("btn-got-it").onclick = () => processResult(true, false);
+    document.getElementById("btn-missed-it").onclick = () => processResult(false, false);
 
-    function processResult(isCorrect) {
+    function processResult(isCorrect, isPartial) {
         const feedback = document.getElementById("feedback");
         document.getElementById("self-grade-buttons").style.display = "none";
         document.getElementById("check-answer").disabled = true;
@@ -1081,21 +1330,32 @@
         document.querySelectorAll(".option-btn").forEach(b => b.onclick = null);
 
         if (isCorrect) {
-            score++; shootConfetti();
+            score++; 
+            if (currentMode !== 'exam') shootConfetti(); 
+            
             if (currentMode === "game" || currentMode === "chaos") {
                 const bonus = currentMode === "chaos" ? 4 : 3;
                 gameTime += bonus; showFloatingText(`+${bonus}s`, "time-added");
-                feedback.innerText = "Correct!"; setTimeout(nextQuestion, 800); 
+                feedback.innerHTML = '<span style="color:green">✅ Correct!</span>'; setTimeout(nextQuestion, 800); 
+            } else if (currentMode !== "exam" && inputMethod === "buttons") {
+                 feedback.innerHTML = '<span style="color:var(--correct)">✅ <strong>Correct!</strong></span>';
+            }
+        } else if (isPartial) {
+            // Partial Credit logic
+            if (!missedQueue.includes(currentQuestion.drug)) missedQueue.push(currentQuestion.drug);
+            if (currentMode === "game" || currentMode === "chaos") {
+                gameTime -= 2; showFloatingText("-2s", "time-lost"); 
+                feedback.innerHTML = '<span style="color:orange">⚠️ Partial</span>'; setTimeout(nextQuestion, 800);
             } else if (currentMode !== "exam") {
-                feedback.innerText = "Correct!"; feedback.style.color = "var(--correct)";
+                feedback.innerHTML = '<span style="color:var(--partial-text)">⚠️ <strong>Partially Correct</strong></span>';
             }
         } else {
             if (!missedQueue.includes(currentQuestion.drug)) missedQueue.push(currentQuestion.drug);
             if (currentMode === "game" || currentMode === "chaos") {
                 gameTime -= 5; showFloatingText("-5s", "time-lost");
-                feedback.innerText = "Wrong!"; setTimeout(nextQuestion, 800);
-            } else if (currentMode !== "exam") {
-                feedback.innerText = "Incorrect."; feedback.style.color = "var(--incorrect)";
+                feedback.innerHTML = '<span style="color:red">❌ Incorrect</span>'; setTimeout(nextQuestion, 800);
+            } else if (currentMode !== "exam" && inputMethod === "buttons") {
+                 feedback.innerHTML = '<span style="color:var(--incorrect)">❌ <strong>Incorrect</strong></span>';
             }
         }
         updateScoreAndProgress();
@@ -1126,6 +1386,12 @@
       if (currentMode === 'study' && !isSmartReviewActive && totalQuestions !== 0) total = totalQuestions;
       
       const percent = total > 0 ? (score / total) * 100 : 0;
+      
+      // Fire confetti at the end of exam if score is good
+      if (currentMode === 'exam' && percent >= 70) {
+          shootConfetti();
+      }
+
       let reviewBtnHTML = "";
       if (missedQueue.length > 0) {
           reviewBtnHTML = `<br><button id="btn-review-missed" style="background:#ffcce0; color:#d63384;">Review ${missedQueue.length} Missed Items</button>`;
@@ -1134,6 +1400,7 @@
       document.getElementById("feedback").innerHTML = `
         <div style="font-size: 20px; margin-bottom: 8px;">${(currentMode === "game" || currentMode === "chaos") ? "Time's Up!" : "Quiz Complete!"}</div>
         <div style="font-size: 18px; margin-bottom: 15px;">Score: <strong>${score} / ${total}</strong> (${Math.round(percent)}%)</div>
+        <div style="color: #666;">Great job studying!</div>
         ${reviewBtnHTML}
         <br><button onclick="window.location.reload()">Restart App</button>
       `;
