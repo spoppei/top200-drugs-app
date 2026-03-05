@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 200 Drugs Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="disco-btn" title="Toggle Disco Mode">🪩</div>
+
+<!-- ═══ HEADER ═══ -->
+<header id="app-header">
+  <div class="header-logo">Rx Quiz <span>/ Top 200</span></div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-page="quiz">📝 Quiz</button>
+    <button class="nav-tab" data-page="match">🃏 Match</button>
+    <button class="nav-tab" data-page="reference">📚 Reference</button>
+    <button class="nav-tab" data-page="feedback">💬 Feedback</button>
+  </nav>
+  <div class="header-actions">
+    <button class="icon-btn" id="btn-a11y" title="Accessibility">⚙️</button>
+  </div>
+</header>
+
+<!-- ═══ ACCESSIBILITY PANEL ═══ -->
+<div style="max-width:960px; margin:0 auto; padding: 0 20px;">
+  <div id="a11y-panel">
+    <button class="small-btn" id="btn-dark">🌙 Dark Mode</button>
+    <button class="small-btn" id="btn-large-text">🔤 Large Text: OFF</button>
+    <button class="small-btn" id="btn-reduce-motion">✋ Reduce Motion: OFF</button>
+    <button class="small-btn" id="btn-high-contrast">⬛ High Contrast: OFF</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ -->
+<!-- PAGE: QUIZ                 -->
+<!-- ═══════════════════════════ -->
+<div class="page active" id="page-quiz">
+
+  <div id="controls">
+    <!-- Mode -->
+    <div class="ctrl-row">
+      <span class="ctrl-label">Mode</span>
+      <div class="mode-btns">
+        <button class="mode-btn active" data-mode="study">Study</button>
+        <button class="mode-btn" data-mode="exam">Exam</button>
+        <button class="mode-btn" data-mode="flashcards">Flashcards</button>
+        <button class="mode-btn" data-mode="game">⏱ Time Attack</button>
+        <button class="mode-btn" data-mode="chaos">🌀 CHAOS</button>
+      </div>
+    </div>
+
+    <!-- Question Types -->
+    <div class="ctrl-row" id="qtype-row">
+      <span class="ctrl-label">Q Types</span>
+      <div class="pill-group">
+        <input type="checkbox" id="qm1"  class="pill-cb qtype" value="gen_brand" checked><label for="qm1"  class="pill-label">Gen → Brand</label>
+        <input type="checkbox" id="qm2"  class="pill-cb qtype" value="brand_gen"><label  for="qm2"  class="pill-label">Brand → Gen</label>
+        <input type="checkbox" id="qm3"  class="pill-cb qtype" value="gen_ind"><label    for="qm3"  class="pill-label">Gen → Ind</label>
+        <input type="checkbox" id="qm4"  class="pill-cb qtype" value="brand_ind"><label  for="qm4"  class="pill-label">Brand → Ind</label>
+        <input type="checkbox" id="qm5"  class="pill-cb qtype" value="ind_gen"><label    for="qm5"  class="pill-label">Ind → Gen</label>
+        <input type="checkbox" id="qm6"  class="pill-cb qtype" value="ind_brand"><label  for="qm6"  class="pill-label">Ind → Brand</label>
+        <input type="checkbox" id="qm7"  class="pill-cb qtype" value="gen_class"><label  for="qm7"  class="pill-label">Gen → Class</label>
+        <input type="checkbox" id="qm8"  class="pill-cb qtype" value="brand_class"><label for="qm8" class="pill-label">Brand → Class</label>
+        <input type="checkbox" id="qm9"  class="pill-cb qtype" value="class_gen"><label  for="qm9"  class="pill-label">Class → Gen</label>
+        <input type="checkbox" id="qm10" class="pill-cb qtype" value="class_brand"><label for="qm10" class="pill-label">Class → Brand</label>
+      </div>
+    </div>
+
+    <!-- Input + Length -->
+    <div class="ctrl-row">
+      <div style="display:flex; align-items:center; gap:8px;" id="input-row">
+        <span class="ctrl-label">Input</span>
+        <button class="small-btn input-btn active" data-input="buttons">Buttons</button>
+        <button class="small-btn input-btn" data-input="text">Type</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="ctrl-label">Length</span>
+        <select id="num-q">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="0">Endless</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Quiz filter -->
+    <details>
+      <summary>Select Quizzes to Include</summary>
+      <div class="quiz-checkboxes" style="margin-top:10px;">
+        <!-- FALL -->
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F1"  checked> F1: Asthma/Allergies</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F2"  checked> F2: Diabetes/Antiplatelet</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F3"  checked> F3: Insomnia/Pain/Stim</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F4"  checked> F4: GI/Supplements</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F5"  checked> F5: Women's/Men's Health</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F6"  checked> F6: HTN/Lipids</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F7"  checked> F7: Antibiotics I</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F8"  checked> F8: Antibiotics II</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F9"  checked> F9: Antidepressants</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="F10" checked> F10: Antipsychotics</label>
+        <!-- WINTER -->
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W1"  checked> W1: Cardiovascular I</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W2"  checked> W2: Cardiovascular II</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W3"  checked> W3: Cardiovascular III</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W4"  checked> W4: Pain I</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W5"  checked> W5: Pain II</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W6"  checked> W6: Women/Men/HIV</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W7"  checked> W7: Asthma/COPD</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W8"  checked> W8: Neurology</label>
+        <label class="quiz-check-label"><input type="checkbox" class="qcheck" value="W9"  checked> W9: Miscellaneous</label>
+      </div>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="small-btn" id="sel-all">All</button>
+        <button class="small-btn" id="sel-none">None</button>
+      </div>
+    </details>
+
+    <button id="start-btn">START SESSION</button>
+    <button id="smart-review-btn">🔁 Review Missed Items</button>
+  </div>
+
+  <!-- Progress -->
+  <div id="progress-track"><div id="progress-fill"></div></div>
+
+  <!-- Quiz Card -->
+  <div id="quiz-card">
+    <div id="game-hud">
+      <span>⏱ <span id="timer-val">60</span>s</span>
+      <span>Score: <span id="game-score-val">0</span></span>
+    </div>
+    <div id="question-text">Welcome! Configure settings above and hit Start. 🎯</div>
+    <div id="options-grid"></div>
+    <div id="text-input-wrap">
+      <input type="text" id="answer-input" placeholder="Type your answer..." autocomplete="off">
+      <div style="font-size:0.78em; opacity:0.5;">Press Enter to submit</div>
+    </div>
+    <div id="fc-wrap">
+      <div id="fc-inner">
+        <div class="fc-face fc-front">
+          <div class="fc-label">Question</div>
+          <div class="fc-text" id="fc-front"></div>
+          <div class="fc-hint">Click or press Space to flip</div>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-label">Answer</div>
+          <div class="fc-text" id="fc-back"></div>
+        </div>
+      </div>
+    </div>
+    <div id="feedback"></div>
+    <div id="self-grade-btns">
+      <button id="btn-got-it">✅ Got it</button>
+      <button id="btn-missed-it">❌ Missed it</button>
+    </div>
+    <div id="bottom-bar">
+      <span class="stat-text" id="stat-left"></span>
+      <span class="stat-text" id="stat-right"></span>
+      <div style="display:flex; gap:8px;">
+        <button id="check-btn" disabled>Check</button>
+        <button id="next-btn" disabled>Next →</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end page-quiz -->
+
+<!-- ═══════════════════════════ -->
+<!-- PAGE: MATCH                -->
+<!-- ═══════════════════════════ -->
+<div class="page" id="page-match">
+  <div id="match-container"></div>
+</div>
+
+<!-- ═══════════════════════════ -->
+<!-- PAGE: REFERENCE            -->
+<!-- ═══════════════════════════ -->
+<div class="page" id="page-reference">
+  <div class="ref-header">
+    <div class="ref-title">📚 Drug Reference</div>
+    <div class="ref-tab-btns">
+      <button class="ref-tab-btn active" data-ref="fall">Fall (Top 100)</button>
+      <button class="ref-tab-btn" data-ref="winter">Winter (Top 200)</button>
+    </div>
+    <input type="text" class="ref-search" id="ref-search" placeholder="🔍 Search drugs...">
+  </div>
+  <div id="ref-content"></div>
+</div>
+
+<!-- ═══════════════════════════ -->
+<!-- PAGE: FEEDBACK             -->
+<!-- ═══════════════════════════ -->
+<div class="page" id="page-feedback">
+  <div class="feedback-wrap">
+    <div class="feedback-title">💬 Send Feedback</div>
+    <div class="feedback-sub">Found an error in the drug data? Have a suggestion? Let us know!</div>
+
+    <form id="feedback-form" action="https://formspree.io/f/xlgwzpkp" method="POST">
+      <div class="form-group">
+        <label class="form-label">Feedback Type *</label>
+        <select class="form-select" name="type" required>
+          <option value="">Select a type...</option>
+          <option value="Data Error">🐛 Data Error (wrong drug info)</option>
+          <option value="Missing Drug">💊 Missing Drug</option>
+          <option value="UI Bug">🔧 UI Bug</option>
+          <option value="Feature Request">✨ Feature Request</option>
+          <option value="General">💬 General Feedback</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Drug Name (if applicable)</label>
+        <input type="text" class="form-input" name="drug_name" placeholder="e.g. Metformin / Glucophage">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Message *</label>
+        <textarea class="form-textarea" name="message" required placeholder="Describe the issue or suggestion in detail. For data errors, please include what is currently shown vs what it should say."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Name (optional)</label>
+        <input type="text" class="form-input" name="name" placeholder="Anonymous is fine too">
+      </div>
+      <button type="submit" id="feedback-submit">Send Feedback →</button>
+      <div id="form-success">✅ Thanks! Your feedback has been sent. I'll review it soon.</div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ GAME OVERLAY ═══ -->
+<div id="overlay">
+  <div class="overlay-box">
+    <div class="overlay-title" id="overlay-title">TIME ATTACK</div>
+    <p id="overlay-desc" style="margin-bottom:8px; opacity:0.7;">Answer as many as you can before time runs out!</p>
+    <ul class="overlay-list" id="overlay-list"></ul>
+    <button id="overlay-start-btn">🚀 START GAME</button>
+    <button id="overlay-cancel-btn">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<!-- Load order matters: drugs first, then main logic -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="drugs.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
