@@ -632,8 +632,8 @@ body.chaos-on { animation: chaos-bg 4s linear infinite; }
 
 .generic-cell { font-weight: 700; }
 .brand-cell   { color: var(--accent); font-weight: 500; }
-.class-cell   { font-size: 0.85em; opacity: 0.8; }
-.ind-cell     { font-size: 0.83em; }
+.class-cell   { font-size: 0.95em; opacity: 0.8; }
+.ind-cell     { font-size: 0.95em; }
 
 .ind-pill {
   display: inline-block;
