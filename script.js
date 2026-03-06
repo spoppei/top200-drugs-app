@@ -219,7 +219,6 @@ function getActiveTypes() {
 }
 
 function getFilteredDrugs() {
-  if (isSmartReview) return [...missedQueue];
   const sel = new Set(Array.from(document.querySelectorAll(".qcheck:checked")).map(c => c.value));
   if (sel.size === 0) return allDrugs;
   return allDrugs.filter(d => d.quiz && sel.has(d.quiz));
@@ -237,6 +236,11 @@ function isValidType(type, drug) {
 }
 
 function buildDeck() {
+  // Smart review: replay exact {drug, type} pairs that were missed
+  if (isSmartReview) {
+    deck = shuffle([...missedQueue]);
+    return;
+  }
   const pool  = getFilteredDrugs();
   const types = getActiveTypes();
   deck = [];
@@ -587,7 +591,7 @@ function processResult(correct, partial) {
       fb.innerHTML = `<span style="color:var(--green)">✅ Correct!</span>`;
     }
   } else if (partial) {
-    if (!missedQueue.includes(currentQ.drug)) missedQueue.push(currentQ.drug);
+    if (!missedQueue.some(m => m.drug === currentQ.drug && m.type === currentQ.type)) missedQueue.push({ drug: currentQ.drug, type: currentQ.type });
     if (mode === "game" || mode === "chaos") {
       gameTime -= 2;
       fb.innerHTML = `<span style="color:var(--yellow)">⚠️ Partial. -2s</span>`;
@@ -596,7 +600,7 @@ function processResult(correct, partial) {
       fb.innerHTML = `<span style="color:var(--yellow)">⚠️ Partially correct.</span> All: <strong>${currentQ.correctText}</strong>`;
     }
   } else {
-    if (!missedQueue.includes(currentQ.drug)) missedQueue.push(currentQ.drug);
+    if (!missedQueue.some(m => m.drug === currentQ.drug && m.type === currentQ.type)) missedQueue.push({ drug: currentQ.drug, type: currentQ.type });
     if (mode === "game" || mode === "chaos") {
       gameTime -= 5;
       document.getElementById("timer-val").style.color = "var(--red)";
