@@ -899,13 +899,13 @@ const fallSectionNames = {
 const winterSectionNames = {
   W1: "Quiz 1: Cardiovascular I",
   W2: "Quiz 2: Cardiovascular II",
-  W3: "Quiz 3: Cardiovascular III",
-  W4: "Quiz 4: Pain I",
-  W5: "Quiz 5: Pain II",
-  W6: "Quiz 6: Women's / Men's Health & HIV",
-  W7: "Quiz 7: Asthma & COPD",
-  W8: "Quiz 8: Neurology",
-  W9: "Quiz 9: Miscellaneous",
+  W3: "Quiz 3: Pain I",
+  W4: "Quiz 4: Pain II",
+  W5: "Quiz 5: Women's / Men's Health & HIV",
+  W6: "Quiz 6: Asthma & COPD",
+  W7: "Quiz 7: Neurology",
+  W8: "Quiz 8: Miscellaneous",
+  W9: "Quiz 9: Miscellaneous II",
 };
 
 function renderReference(set, search = "") {
