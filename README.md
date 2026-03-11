@@ -2,7 +2,7 @@
 
 A browser-based quiz and reference app for pharmacy students studying the **Top 200 Medications** curriculum. Built for the Class of 2029 at the University of Michigan College of Pharmacy.
 
-🔗 **Live app:** [spoppei.github.io](https://spoppei.github.io)
+🔗 **Live app:** [spoppei.github.io]([https://spoppei.github.io](https://spoppei.github.io/top200-drugs-app/))
 
 ---
 
