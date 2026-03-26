@@ -12,24 +12,9 @@
 
 const changelog = [
   {
-    version: "1.4",
-    date: "March 26, 2026",
-    title: "Indication Standardization",
-    changes: [
-      { type: "update", text: "The Fall and Winter course documents use slightly different wording for some indications, which was causing certain drugs to not group together correctly in quiz questions. We've standardized these so everything plays nicely together!" },
-      { type: "fix", text: "Seizure → Seizures: standardized to plural across all drugs (Clonazepam, Diazepam)" },
-      { type: "fix", text: "Angina pectoris → Angina: standardized to match all other drugs (Propranolol)" },
-      { type: "fix", text: "Atrial fibrillation (stroke prevention) → Atrial fibrillation: removed qualifier to match source document column header (Apixaban, Dabigatran, Rivaroxaban)" },
-      { type: "fix", text: "Migraine headaches → Migraine: standardized to match all other drugs (Topiramate)" },
-      { type: "fix", text: "Tourette's disorder → Tourette syndrome: standardized across both drugs (Aripiprazole)" },
-      { type: "fix", text: "Urinary tract infections → Urinary tract infection (UTI): standardized to match all other drugs (Amoxicillin/Clavulanate)" },
-      { type: "fix", text: "Attention-deficit/hyperactivity disorder → Attention-deficit hyperactivity disorder: removed slash to match all other ADHD drugs (Adderall)" },
-    ]
-  },
-  {
     version: "1.3",
     date: "March 26, 2026",
-    title: "Drug Data Corrections",
+    title: "Drug Data Corrections & Standardization",
     changes: [
       { type: "fix", text: "Lamotrigine (Lamictal): removed incorrect Seizures indication — source document shows Bipolar disorder only" },
       { type: "fix", text: "Methylprednisolone (Medrol): removed incorrect Asthma indication — source document shows 'Conditions affecting multiple organ systems' only" },
@@ -38,6 +23,14 @@ const changelog = [
       { type: "fix", text: "Rivaroxaban (Xarelto): corrected indications — removed PE, added Thromboembolism per source document" },
       { type: "fix", text: "Valacyclovir (Valtrex): changed 'Herpes simplex' to 'Genital herpes simplex' to match source document" },
       { type: "fix", text: "Meclizine (Antivert): corrected drug class from '1st generation antihistamine' to 'Antihistamine' — source document leaves generation unspecified" },
+      { type: "update", text: "The Fall and Winter course documents use slightly different wording for some indications, which was causing certain drugs to not group together correctly in quiz questions. We've standardized these so everything plays nicely together!" },
+      { type: "fix", text: "Seizure → Seizures: standardized to plural across all drugs (Clonazepam, Diazepam)" },
+      { type: "fix", text: "Angina pectoris → Angina: standardized to match all other drugs (Propranolol)" },
+      { type: "fix", text: "Atrial fibrillation (stroke prevention) → Atrial fibrillation: removed qualifier to match source document column header (Apixaban, Dabigatran, Rivaroxaban)" },
+      { type: "fix", text: "Migraine headaches → Migraine: standardized to match all other drugs (Topiramate)" },
+      { type: "fix", text: "Tourette's disorder → Tourette syndrome: standardized across both drugs (Aripiprazole)" },
+      { type: "fix", text: "Urinary tract infections → Urinary tract infection (UTI): standardized to match all other drugs (Amoxicillin/Clavulanate)" },
+      { type: "fix", text: "Attention-deficit/hyperactivity disorder → Attention-deficit hyperactivity disorder: removed slash to match all other ADHD drugs (Adderall)" },
     ]
   },
   {
