@@ -96,6 +96,7 @@ document.querySelectorAll(".nav-tab").forEach(tab => {
 
     if (tab.dataset.page === "reference") renderReference("fall");
     if (tab.dataset.page === "match")     initMatchGame();
+    if (tab.dataset.page === "changelog") renderChangelog();
   });
 });
 
@@ -990,3 +991,33 @@ document.getElementById("feedback-form").addEventListener("submit", async functi
 /* ── 16. Init ────────────────────────────────── */
 updateControlsForMode();
 renderReference("fall");
+
+/* ── 17. Changelog ───────────────────────────── */
+function renderChangelog() {
+  const container = document.getElementById("changelog-content");
+  if (!container) return;
+  if (typeof changelog === "undefined" || !changelog.length) {
+    container.innerHTML = "<p style='opacity:0.5; padding:20px 0;'>No changelog entries found.</p>";
+    return;
+  }
+
+  const tagLabel = { fix: "Fix", add: "New", update: "Update", remove: "Removed" };
+
+  container.innerHTML = changelog.map(v => `
+    <div class="cl-version-block">
+      <div class="cl-version-header">
+        <span class="cl-version-badge">v${v.version}</span>
+        <span class="cl-version-title">${v.title}</span>
+        <span class="cl-version-date">${v.date}</span>
+      </div>
+      <ul class="cl-changes-list">
+        ${v.changes.map(c => `
+          <li class="cl-change-item">
+            <span class="cl-tag cl-tag-${c.type}">${tagLabel[c.type] || c.type}</span>
+            <span>${c.text}</span>
+          </li>
+        `).join("")}
+      </ul>
+    </div>
+  `).join("");
+}
