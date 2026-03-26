@@ -23,7 +23,7 @@ const changelog = [
       { type: "fix", text: "Rivaroxaban (Xarelto): corrected indications — removed PE, added Thromboembolism per source document" },
       { type: "fix", text: "Valacyclovir (Valtrex): changed 'Herpes simplex' to 'Genital herpes simplex' to match source document" },
       { type: "fix", text: "Meclizine (Antivert): corrected drug class from '1st generation antihistamine' to 'Antihistamine' — source document leaves generation unspecified" },
-      { type: "update", text: "The Fall and Winter course documents use slightly different wording for some indications, which was causing certain drugs to not group together correctly in quiz questions. I've tried to standardized these so everything plays nicely together! I'm sure there might be more along the way, but thank you to everyone that given feedback for me to find he errors :)" },
+      { type: "update", text: "The Fall and Winter course documents use slightly different wording for some indications, which was causing certain drugs to not group together correctly in quiz questions. I've tried to standardized these so everything plays nicely together! I'm sure there might be more along the way, but thank you to everyone that given feedback for me to find the errors :)" },
       { type: "fix", text: "Seizure → Seizures: standardized to plural across all drugs (Clonazepam, Diazepam)" },
       { type: "fix", text: "Angina pectoris → Angina: standardized to match all other drugs (Propranolol)" },
       { type: "fix", text: "Atrial fibrillation (stroke prevention) → Atrial fibrillation: removed qualifier to match source document column header (Apixaban, Dabigatran, Rivaroxaban)" },
