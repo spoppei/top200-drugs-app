@@ -18,6 +18,7 @@
     <button class="nav-tab active" data-page="quiz">📝 Quiz</button>
     <button class="nav-tab" data-page="match">🃏 Match</button>
     <button class="nav-tab" data-page="reference">📚 Reference</button>
+    <button class="nav-tab" data-page="changelog">📋 Changelog</button>
     <button class="nav-tab" data-page="feedback">💬 Feedback</button>
   </nav>
   <div class="header-actions">
@@ -192,6 +193,17 @@
 </div>
 
 <!-- ═══════════════════════════ -->
+<!-- PAGE: CHANGELOG            -->
+<!-- ═══════════════════════════ -->
+<div class="page" id="page-changelog">
+  <div class="changelog-wrap">
+    <div class="changelog-title">📋 Changelog</div>
+    <div class="changelog-sub">Data corrections, new features, and version history.</div>
+    <div id="changelog-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ -->
 <!-- PAGE: FEEDBACK             -->
 <!-- ═══════════════════════════ -->
 <div class="page" id="page-feedback">
@@ -244,6 +256,7 @@
 <!-- Load order matters: drugs first, then main logic -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="drugs.js"></script>
+<script src="changelog.js"></script>
 <script src="script.js"></script>
 
 </body>
